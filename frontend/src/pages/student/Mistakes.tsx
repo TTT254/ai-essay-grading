@@ -2,7 +2,7 @@
  * 学生错题本页面 - 重新设计版
  */
 import React, { useState, useEffect } from 'react';
-import { Tag, Typography, Button, Segmented } from 'antd';
+import { Tag, Typography, Button, Segmented, message } from 'antd';
 import {
   BookOutlined,
   CheckCircleOutlined,
@@ -48,6 +48,8 @@ const Mistakes: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
 
+  const [masteringIds, setMasteringIds] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     if (user?.id) {
       loadMistakes();
@@ -74,11 +76,27 @@ const Mistakes: React.FC = () => {
   };
 
   const handleMarkMastered = async (mistakeId: string) => {
+    // 乐观更新
+    setMistakes((prev) =>
+      prev.map((m) => (m.id === mistakeId ? { ...m, is_mastered: true } : m))
+    );
+    setMasteringIds((prev) => new Set(prev).add(mistakeId));
+
     try {
       await api.mistakes.markMastered(mistakeId);
-      loadMistakes();
-    } catch (err: unknown) {
-      void err;
+      message.success('已标记为掌握');
+    } catch {
+      // 回滚乐观更新
+      setMistakes((prev) =>
+        prev.map((m) => (m.id === mistakeId ? { ...m, is_mastered: false } : m))
+      );
+      message.error('标记失败，请重试');
+    } finally {
+      setMasteringIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mistakeId);
+        return next;
+      });
     }
   };
 
@@ -200,6 +218,7 @@ const Mistakes: React.FC = () => {
                     ghost
                     size="small"
                     icon={<CheckCircleOutlined />}
+                    loading={masteringIds.has(mistake.id)}
                     onClick={() => handleMarkMastered(mistake.id)}
                     className="mastered-btn"
                   >
