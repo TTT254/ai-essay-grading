@@ -14,6 +14,7 @@ import * as echarts from 'echarts';
 import { useAuthStore } from '../../store/authStore';
 import { useTeacherStore } from '../../store/teacherStore';
 import api from '../../services/api';
+import './Dashboard.css';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -124,21 +125,36 @@ const Dashboard: React.FC = () => {
     }
     const chart = scoreDistChartInstance.current;
     chart.setOption({
-      title: { text: '分数分布', left: 'center' },
       tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
       xAxis: {
         type: 'category',
         data: ['0-59', '60-69', '70-79', '80-89', '90-100'],
+        axisLine: { lineStyle: { color: '#e2e8f0' } },
+        axisLabel: { color: '#64748B' },
       },
-      yAxis: { type: 'value', name: '人数' },
+      yAxis: {
+        type: 'value',
+        name: '人数',
+        nameTextStyle: { color: '#64748B' },
+        splitLine: { lineStyle: { color: '#f0f0f0' } },
+        axisLabel: { color: '#64748B' },
+      },
       series: [
         {
           name: '学生人数',
           type: 'bar',
           data: distribution,
-          itemStyle: { color: '#1890ff' },
+          barMaxWidth: 48,
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: '#0066FF' },
+              { offset: 1, color: '#66A3FF' },
+            ]),
+            borderRadius: [4, 4, 0, 0],
+          },
         },
       ],
+      grid: { left: 40, right: 20, top: 20, bottom: 40 },
     });
   };
 
@@ -150,15 +166,23 @@ const Dashboard: React.FC = () => {
     }
     const chart = trendChartInstance.current;
     chart.setOption({
-      title: { text: '各作业平均分', left: 'center' },
       tooltip: { trigger: 'axis' },
       xAxis: {
         type: 'category',
         data: assignmentScores.map((a) => a.title),
-        axisLabel: { rotate: 30, overflow: 'truncate', width: 80 },
+        axisLabel: { rotate: 30, overflow: 'truncate', width: 80, color: '#64748B' },
+        axisLine: { lineStyle: { color: '#e2e8f0' } },
         boundaryGap: false,
       },
-      yAxis: { type: 'value', name: '平均分', min: 0, max: 100 },
+      yAxis: {
+        type: 'value',
+        name: '平均分',
+        nameTextStyle: { color: '#64748B' },
+        min: 0,
+        max: 100,
+        splitLine: { lineStyle: { color: '#f0f0f0' } },
+        axisLabel: { color: '#64748B' },
+      },
       series: [
         {
           name: '平均分',
@@ -167,20 +191,24 @@ const Dashboard: React.FC = () => {
           data: assignmentScores.map((a) => a.avg_score),
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(24, 144, 255, 0.3)' },
-              { offset: 1, color: 'rgba(24, 144, 255, 0.05)' },
+              { offset: 0, color: 'rgba(0, 102, 255, 0.25)' },
+              { offset: 1, color: 'rgba(0, 102, 255, 0.02)' },
             ]),
           },
-          itemStyle: { color: '#1890ff' },
+          itemStyle: { color: '#0066FF' },
+          lineStyle: { color: '#0066FF', width: 2 },
+          symbol: 'circle',
+          symbolSize: 6,
         },
       ],
+      grid: { left: 40, right: 20, top: 20, bottom: 60 },
     });
   };
 
   return (
     <div className="page-container">
-      <div className="page-header">
-        <Title level={2}>数据统计</Title>
+      <div className="page-header" style={{ marginBottom: 24 }}>
+        <Title level={3} style={{ margin: 0 }}>数据看板</Title>
         <Space>
           <Select
             placeholder="选择班级查看详情"
@@ -200,46 +228,60 @@ const Dashboard: React.FC = () => {
 
       {/* 教师总览统计 */}
       <Spin spinning={statsLoading}>
-        <Row gutter={16} style={{ marginBottom: 24 }}>
-          <Col span={6}>
-            <Card>
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card stat-card--blue">
+              <div className="stat-card-icon">
+                <TeamOutlined />
+              </div>
               <Statistic
-                title="我的班级"
+                title="班级数量"
                 value={teacherStats.total_classes}
-                prefix={<TeamOutlined />}
                 suffix="个"
+                valueStyle={{ fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card stat-card--green">
+              <div className="stat-card-icon">
+                <FileTextOutlined />
+              </div>
               <Statistic
-                title="作业总数"
+                title="作业数量"
                 value={teacherStats.total_assignments}
-                prefix={<FileTextOutlined />}
                 suffix="个"
+                valueStyle={{ fontSize: 28, fontWeight: 700 }}
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card stat-card--orange">
+              <div className="stat-card-icon">
+                <ClockCircleOutlined />
+              </div>
               <Statistic
-                title="待批改"
+                title="待批改数量"
                 value={teacherStats.pending_grading}
-                prefix={<ClockCircleOutlined />}
                 suffix="篇"
-                valueStyle={{ color: teacherStats.pending_grading > 0 ? '#cf1322' : undefined }}
+                valueStyle={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  color: teacherStats.pending_grading > 0 ? '#F59E0B' : undefined,
+                }}
               />
             </Card>
           </Col>
-          <Col span={6}>
-            <Card>
+          <Col xs={24} sm={12} lg={6}>
+            <Card className="stat-card stat-card--purple">
+              <div className="stat-card-icon">
+                <CheckCircleOutlined />
+              </div>
               <Statistic
-                title="本周已批改"
+                title="本周批改数"
                 value={teacherStats.weekly_graded}
-                prefix={<CheckCircleOutlined />}
                 suffix="篇"
-                valueStyle={{ color: '#3f8600' }}
+                valueStyle={{ fontSize: 28, fontWeight: 700, color: '#10B981' }}
               />
             </Card>
           </Col>
@@ -251,59 +293,69 @@ const Dashboard: React.FC = () => {
         <Spin spinning={classStatsLoading}>
           {classStats && (
             <>
-              <Row gutter={16} style={{ marginBottom: 24 }}>
-                <Col span={6}>
-                  <Card>
+              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card className="stat-card stat-card--blue">
+                    <div className="stat-card-icon"><FileTextOutlined /></div>
                     <Statistic
                       title="班级作业数"
                       value={classStats.total_assignments}
-                      prefix={<FileTextOutlined />}
                       suffix="个"
+                      valueStyle={{ fontSize: 28, fontWeight: 700 }}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
-                  <Card>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card className="stat-card stat-card--green">
+                    <div className="stat-card-icon"><CheckCircleOutlined /></div>
                     <Statistic
                       title="提交总数"
                       value={classStats.total_submissions}
-                      prefix={<CheckCircleOutlined />}
                       suffix="篇"
+                      valueStyle={{ fontSize: 28, fontWeight: 700 }}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
-                  <Card>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card className="stat-card stat-card--orange">
+                    <div className="stat-card-icon"><ClockCircleOutlined /></div>
                     <Statistic
                       title="已批改"
                       value={classStats.graded_count}
-                      prefix={<ClockCircleOutlined />}
                       suffix="篇"
+                      valueStyle={{ fontSize: 28, fontWeight: 700 }}
                     />
                   </Card>
                 </Col>
-                <Col span={6}>
-                  <Card>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card className="stat-card stat-card--purple">
+                    <div className="stat-card-icon"><TrophyOutlined /></div>
                     <Statistic
                       title="班级平均分"
                       value={classStats.average_score}
-                      prefix={<TrophyOutlined />}
                       precision={1}
                       suffix="分"
+                      valueStyle={{ fontSize: 28, fontWeight: 700 }}
                     />
                   </Card>
                 </Col>
               </Row>
 
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Card>
-                    <div ref={scoreDistChartRef} style={{ width: '100%', height: 400 }} />
+              <Row gutter={[16, 16]}>
+                <Col xs={24} lg={12}>
+                  <Card
+                    title="作文分数分布"
+                    styles={{ header: { borderBottom: '1px solid #f0f0f0', fontWeight: 600 } }}
+                  >
+                    <div ref={scoreDistChartRef} style={{ width: '100%', height: 320 }} />
                   </Card>
                 </Col>
-                <Col span={12}>
-                  <Card>
-                    <div ref={trendChartRef} style={{ width: '100%', height: 400 }} />
+                <Col xs={24} lg={12}>
+                  <Card
+                    title="近7天批改趋势"
+                    styles={{ header: { borderBottom: '1px solid #f0f0f0', fontWeight: 600 } }}
+                  >
+                    <div ref={trendChartRef} style={{ width: '100%', height: 320 }} />
                   </Card>
                 </Col>
               </Row>
@@ -311,7 +363,7 @@ const Dashboard: React.FC = () => {
           )}
           {!classStats && !classStatsLoading && (
             <Card>
-              <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
+              <div style={{ textAlign: 'center', padding: 40, color: '#94A3B8' }}>
                 暂无班级数据
               </div>
             </Card>

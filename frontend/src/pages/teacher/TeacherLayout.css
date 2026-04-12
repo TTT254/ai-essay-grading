@@ -1,0 +1,224 @@
+/* ===== Teacher Layout ===== */
+
+.teacher-layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* Sidebar — uses Ant Design Sider (position: sticky via ant-layout-sider) */
+.teacher-sider {
+  background: #ffffff !important;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: width 0.2s ease;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Logo area */
+.sider-logo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  border-bottom: 1px solid #f0f0f0;
+  overflow: hidden;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sider-logo--collapsed {
+  padding: 0;
+  justify-content: center;
+}
+
+.sider-logo-icon {
+  font-size: 22px;
+  color: #0066FF;
+  flex-shrink: 0;
+}
+
+.sider-logo-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+  letter-spacing: -0.3px;
+}
+
+/* Navigation menu */
+.sider-menu {
+  flex: 1;
+  border-right: none !important;
+  padding: 8px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sider-menu .ant-menu-item {
+  margin: 2px 8px;
+  border-radius: 8px;
+  height: 44px;
+  line-height: 44px;
+  color: #64748B;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sider-menu .ant-menu-item:hover {
+  background: rgba(0, 102, 255, 0.08) !important;
+  color: #0066FF !important;
+}
+
+.sider-menu .ant-menu-item-selected {
+  background: #0066FF !important;
+  color: #ffffff !important;
+}
+
+.sider-menu .ant-menu-item-selected .anticon {
+  color: #ffffff !important;
+}
+
+.sider-menu .ant-menu-item-selected:hover {
+  background: #0052CC !important;
+  color: #ffffff !important;
+}
+
+/* Bottom section */
+.sider-bottom {
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sider-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sider-user-avatar {
+  flex-shrink: 0;
+}
+
+.sider-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sider-collapse-btn {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748B;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sider-collapse-btn:hover {
+  background: rgba(0, 102, 255, 0.08);
+  color: #0066FF;
+  border-color: #0066FF;
+}
+
+/* Main area — marginLeft set via inline style in TSX */
+.teacher-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #F7F9FC;
+  transition: margin-left 0.2s ease;
+}
+
+/* Header */
+.teacher-header {
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  flex-shrink: 0;
+}
+
+.header-breadcrumb {
+  flex: 1;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748B;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.header-icon-btn:hover {
+  background: rgba(0, 102, 255, 0.08);
+  color: #0066FF;
+}
+
+.header-user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.header-user-trigger:hover {
+  background: rgba(0, 102, 255, 0.08);
+}
+
+.header-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0F172A;
+}
+
+/* Content */
+.teacher-content {
+  flex: 1;
+  padding: 24px;
+  background: #F7F9FC;
+}
