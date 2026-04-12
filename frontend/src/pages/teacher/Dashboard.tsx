@@ -2,7 +2,7 @@
  * 教师数据统计页面
  */
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, Row, Col, Statistic, Select, Space, Typography, Spin } from 'antd';
+import { Card, Row, Col, Statistic, Select, Space, Typography, Spin, Table, Tag } from 'antd';
 import {
   FileTextOutlined,
   CheckCircleOutlined,
@@ -35,6 +35,15 @@ interface ClassStats {
   assignment_avg_scores: { title: string; avg_score: number; count: number }[];
 }
 
+interface RankingItem {
+  rank: number;
+  student_id: string;
+  student_name: string;
+  average_score: number;
+  submission_count: number;
+  last_submitted: string | null;
+}
+
 const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
   const { classes, fetchClasses } = useTeacherStore();
@@ -46,6 +55,8 @@ const Dashboard: React.FC = () => {
     weekly_graded: 0,
   });
   const [classStats, setClassStats] = useState<ClassStats | null>(null);
+  const [ranking, setRanking] = useState<RankingItem[]>([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [classStatsLoading, setClassStatsLoading] = useState(false);
 
@@ -64,6 +75,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (selectedClassId) {
       loadClassStats(selectedClassId);
+      loadClassRanking(selectedClassId);
+    } else {
+      setRanking([]);
     }
   }, [selectedClassId]);
 
@@ -109,6 +123,19 @@ const Dashboard: React.FC = () => {
       setClassStats(null);
     } finally {
       setClassStatsLoading(false);
+    }
+  };
+
+  const loadClassRanking = async (classId: string) => {
+    setRankingLoading(true);
+    try {
+      const response = await api.teacher.getClassRanking(classId);
+      const data = response?.data || response || [];
+      setRanking(Array.isArray(data) ? data : []);
+    } catch {
+      setRanking([]);
+    } finally {
+      setRankingLoading(false);
     }
   };
 
@@ -356,6 +383,57 @@ const Dashboard: React.FC = () => {
                     styles={{ header: { borderBottom: '1px solid #f0f0f0', fontWeight: 600 } }}
                   >
                     <div ref={trendChartRef} style={{ width: '100%', height: 320 }} />
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* 班级排行榜 */}
+              <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+                <Col span={24}>
+                  <Card
+                    title="班级排行"
+                    styles={{ header: { borderBottom: '1px solid #f0f0f0', fontWeight: 600 } }}
+                  >
+                    <Table
+                      loading={rankingLoading}
+                      dataSource={ranking}
+                      rowKey="student_id"
+                      pagination={false}
+                      size="small"
+                      columns={[
+                        {
+                          title: '排名',
+                          dataIndex: 'rank',
+                          key: 'rank',
+                          width: 60,
+                          render: (rank: number) => {
+                            if (rank === 1) return <Tag color="gold">1</Tag>;
+                            if (rank === 2) return <Tag color="silver">2</Tag>;
+                            if (rank === 3) return <Tag color="orange">3</Tag>;
+                            return rank;
+                          },
+                        },
+                        { title: '学生姓名', dataIndex: 'student_name', key: 'student_name' },
+                        {
+                          title: '平均分',
+                          dataIndex: 'average_score',
+                          key: 'average_score',
+                          render: (v: number) => `${v}分`,
+                        },
+                        {
+                          title: '提交数',
+                          dataIndex: 'submission_count',
+                          key: 'submission_count',
+                          render: (v: number) => `${v}篇`,
+                        },
+                        {
+                          title: '最近提交',
+                          dataIndex: 'last_submitted',
+                          key: 'last_submitted',
+                          render: (v: string | null) => v ? new Date(v).toLocaleDateString('zh-CN') : '-',
+                        },
+                      ]}
+                    />
                   </Card>
                 </Col>
               </Row>
