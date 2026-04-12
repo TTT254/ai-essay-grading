@@ -37,9 +37,12 @@ const Report: React.FC = () => {
   }
 
   const report = currentReport;
-  const scores = report.teacher_scores || report.scores || {};
-  const totalScore = report.teacher_scores?.total || report.total_score || 0;
-  const comment = report.teacher_comment || report.comment || '';
+  // AI scores from ai_scores field, teacher scores from teacher_scores
+  const aiScores = report.ai_scores || report.scores || {};
+  const teacherScores = report.teacher_scores || null;
+  const scores = teacherScores || aiScores;
+  const totalScore = report.teacher_scores?.total || report.teacher_total_score || report.ai_total_score || report.total_score || 0;
+  const comment = report.teacher_comment || report.ai_comment || report.comment || '';
 
   // 4 dimensions matching the spec
   const dimensionItems = [
@@ -67,31 +70,51 @@ const Report: React.FC = () => {
 
   const scoreColor = getScoreColor(totalScore);
 
-  // Radar chart options
+  // Radar chart options — show AI score and teacher score if both available
+  const radarSeries: object[] = [
+    {
+      type: 'radar',
+      data: [
+        {
+          value: dimensionItems.map((d) => aiScores[d.key] || 0),
+          name: 'AI评分',
+          areaStyle: { color: 'rgba(0,102,255,0.12)' },
+          lineStyle: { color: '#0066FF', width: 2 },
+          itemStyle: { color: '#0066FF' },
+        },
+      ],
+    },
+  ];
+
+  if (teacherScores) {
+    radarSeries.push({
+      type: 'radar',
+      data: [
+        {
+          value: dimensionItems.map((d) => teacherScores[d.key] || 0),
+          name: '教师评分',
+          areaStyle: { color: 'rgba(82,196,26,0.12)' },
+          lineStyle: { color: '#52c41a', width: 2 },
+          itemStyle: { color: '#52c41a' },
+        },
+      ],
+    });
+  }
+
   const radarOption = {
+    legend: teacherScores
+      ? { data: ['AI评分', '教师评分'], bottom: 0 }
+      : undefined,
     radar: {
       indicator: dimensionItems.map((d) => ({ name: d.label, max: d.total })),
-      center: ['50%', '50%'],
+      center: ['50%', teacherScores ? '45%' : '50%'],
       radius: '65%',
       axisName: { color: '#555', fontSize: 12 },
       splitArea: { areaStyle: { color: ['rgba(0,102,255,0.04)', 'rgba(0,102,255,0.08)'] } },
       axisLine: { lineStyle: { color: 'rgba(0,102,255,0.2)' } },
       splitLine: { lineStyle: { color: 'rgba(0,102,255,0.2)' } },
     },
-    series: [
-      {
-        type: 'radar',
-        data: [
-          {
-            value: dimensionItems.map((d) => scores[d.key] || 0),
-            name: '得分',
-            areaStyle: { color: 'rgba(0,102,255,0.15)' },
-            lineStyle: { color: '#0066FF', width: 2 },
-            itemStyle: { color: '#0066FF' },
-          },
-        ],
-      },
-    ],
+    series: radarSeries,
     tooltip: { trigger: 'item' },
   };
 
