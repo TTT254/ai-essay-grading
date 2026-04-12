@@ -70,13 +70,35 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| UI-01 | Phase 1 — 认证与入口 UI | ⬜ Not Started |
+| UI-02 | Phase 1 — 认证与入口 UI | ⬜ Not Started |
+| UI-03 | Phase 2 — 布局重设计 | ⬜ Not Started |
+| UI-04 | Phase 2 — 布局重设计 | ⬜ Not Started |
+| UI-05 | Phase 3 — 功能页面 UI | ⬜ Not Started |
+| UI-06 | Phase 3 — 功能页面 UI | ⬜ Not Started |
+| UI-07 | Phase 3 — 功能页面 UI | ⬜ Not Started |
+| UI-08 | Phase 6 — 响应式设计 | ⬜ Not Started |
+| FEAT-01 | Phase 4 — 数据真实化 & 核心功能 | ⬜ Not Started |
+| FEAT-02 | Phase 4 — 数据真实化 & 核心功能 | ⬜ Not Started |
+| FEAT-03 | Phase 4 — 数据真实化 & 核心功能 | ⬜ Not Started |
+| FEAT-04 | Phase 4 — 数据真实化 & 核心功能 | ⬜ Not Started |
+| FEAT-05 | Phase 4 — 数据真实化 & 核心功能 | ⬜ Not Started |
+| FEAT-06 | Phase 5 — 高级功能 | ⬜ Not Started |
+| FEAT-07 | Phase 5 — 高级功能 | ⬜ Not Started |
+| FEAT-08 | Phase 5 — 高级功能 | ⬜ Not Started |
+| FEAT-09 | Phase 5 — 高级功能 | ⬜ Not Started |
+| FEAT-10 | Phase 5 — 高级功能 | ⬜ Not Started |
+| TEST-01 | Phase 7 — E2E 测试 | ⬜ Not Started |
+| TEST-02 | Phase 7 — E2E 测试 | ⬜ Not Started |
+| TEST-03 | Phase 7 — E2E 测试 | ⬜ Not Started |
+| TEST-04 | Phase 7 — E2E 测试 | ⬜ Not Started |
+| TEST-05 | Phase 7 — E2E 测试 | ⬜ Not Started |
 
 **Coverage:**
 - v1 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23 ⚠️
+- Mapped to phases: 23 ✅
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation — traceability populated*
