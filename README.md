@@ -100,30 +100,31 @@
 
 ```mermaid
 graph TB
-    subgraph 用户层
-        Browser[浏览器]
-    end
-    subgraph 前端["前端 (React 19 + TypeScript)"]
-        StudentUI[学生端 /student/*]
-        TeacherUI[教师端 /teacher/*]
-        PublicUI[公共页面 /, /login, /register]
-    end
-    subgraph 后端["后端 (FastAPI + Python)"]
-        AuthAPI[/api/auth]
-        StudentAPI[/api/student]
-        TeacherAPI[/api/teacher]
-        GradingAPI[/api/grading]
-        ChatAPI[/api/ai-chat]
-    end
-    subgraph 外部服务
-        Supabase[(Supabase<br/>PostgreSQL + Auth + Storage)]
-        DashScope[阿里云百炼<br/>qwen-plus / qwen-vl-plus]
+    Browser[浏览器] --> Frontend
+
+    subgraph Frontend[前端 React 19 + TypeScript]
+        StudentUI[学生端]
+        TeacherUI[教师端]
+        PublicUI[公共页面]
     end
 
-    Browser --> StudentUI & TeacherUI & PublicUI
-    StudentUI & TeacherUI & PublicUI --> AuthAPI & StudentAPI & TeacherAPI & GradingAPI & ChatAPI
-    AuthAPI & StudentAPI & TeacherAPI & GradingAPI & ChatAPI --> Supabase
-    GradingAPI & ChatAPI --> DashScope
+    subgraph Backend[后端 FastAPI + Python]
+        AuthAPI[认证 API]
+        StudentAPI[学生 API]
+        TeacherAPI[教师 API]
+        GradingAPI[批改 API]
+        ChatAPI[AI对话 API]
+    end
+
+    subgraph External[外部服务]
+        Supabase[(Supabase PostgreSQL)]
+        DashScope[阿里云百炼 AI]
+    end
+
+    Frontend --> Backend
+    Backend --> Supabase
+    GradingAPI --> DashScope
+    ChatAPI --> DashScope
 ```
 
 ---
