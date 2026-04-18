@@ -48,7 +48,24 @@ const AIChat: React.FC = () => {
     setLoadingHistory(true);
     try {
       const data = await api.aiChat.getHistory(user.id, submissionId);
-      setMessages(data || []);
+      // 后端返回 { success, data: [{question, answer, ...}] }
+      // 转换为前端格式 [{role: 'user', content: question}, {role: 'assistant', content: answer}]
+      const conversations = data?.data ?? [];
+      const historyMessages = conversations.flatMap((item: any) => [
+        {
+          id: `history-user-${item.id}`,
+          role: 'user' as const,
+          content: item.question,
+          timestamp: item.created_at ?? new Date().toISOString(),
+        },
+        {
+          id: `history-ai-${item.id}`,
+          role: 'assistant' as const,
+          content: item.answer,
+          timestamp: item.created_at ?? new Date().toISOString(),
+        },
+      ]);
+      setMessages(historyMessages);
     } catch (err: unknown) {
       void err;
     } finally {
@@ -81,7 +98,7 @@ const AIChat: React.FC = () => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.content,
+        content: response.message,
         timestamp: new Date().toISOString(),
       };
 

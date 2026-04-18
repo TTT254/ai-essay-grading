@@ -269,3 +269,62 @@
   align-items: center;
   justify-content: center;
 }
+
+/* ===== Responsive ===== */
+
+@media (max-width: 1024px) {
+  .ai-chat-layout {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ai-chat-layout {
+    max-width: 100%;
+    height: calc(100vh - 64px - 32px);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Wider bubbles on mobile */
+  .chat-bubble-wrap {
+    max-width: 85%;
+  }
+
+  .chat-bubble {
+    font-size: 15px;
+    padding: 10px 14px;
+  }
+
+  /* Larger touch targets */
+  .chat-send-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .chat-textarea {
+    font-size: 16px; /* prevents iOS auto-zoom */
+  }
+
+  .chat-hint-chip {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .chat-topbar {
+    padding: 10px 16px;
+  }
+
+  .chat-messages-area {
+    padding: 16px 12px 8px;
+  }
+
+  .chat-input-area {
+    padding: 10px 12px;
+  }
+}
+

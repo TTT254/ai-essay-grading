@@ -1,0 +1,155 @@
+.classes-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.class-card {
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  transition: box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+
+.class-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.class-card-header {
+  background: linear-gradient(135deg, #0066FF 0%, #4096ff 100%);
+  padding: 20px;
+  color: #fff;
+}
+
+.class-card-grade {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+.class-card-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.class-card-body {
+  padding: 16px 20px;
+}
+
+.class-avatar-stack {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.class-avatar-item {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0066FF;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  border: 2px solid #fff;
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+
+.class-avatar-item:first-child {
+  margin-left: 0;
+}
+
+.class-avatar-more {
+  background: #f0f0f0;
+  color: #666;
+  font-size: 11px;
+}
+
+.class-student-count {
+  font-size: 13px;
+  color: #666;
+  margin-left: 10px;
+}
+
+.class-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.class-card-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.class-card-footer .ant-btn {
+  flex: 1;
+}
+
+.classes-fab {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #0066FF;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  z-index: 100;
+}
+
+.classes-fab:hover {
+  background: #0052cc;
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.5);
+  transform: scale(1.08);
+}
+
+.classes-empty {
+  text-align: center;
+  padding: 80px 0;
+  color: #bbb;
+  font-size: 16px;
+}
+
+@media (max-width: 1024px) {
+  .classes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .classes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .classes-fab {
+    bottom: 24px;
+    right: 24px;
+  }
+}

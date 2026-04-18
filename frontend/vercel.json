@@ -1,0 +1,31 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://your-backend-domain.com/api/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/@(js|css|fonts|media)/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/docs",
+      "destination": "https://your-backend-domain.com/docs",
+      "permanent": false
+    },
+    {
+      "source": "/redoc",
+      "destination": "https://your-backend-domain.com/redoc",
+      "permanent": false
+    }
+  ]
+}

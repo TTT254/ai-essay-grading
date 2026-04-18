@@ -166,3 +166,46 @@
   color: #999;
   margin: 0 4px;
 }
+
+/* ===== Responsive ===== */
+
+@media (max-width: 1024px) {
+  .report-page {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .report-page {
+    max-width: 100%;
+  }
+
+  .score-header-inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .score-header-meta {
+    text-align: center;
+  }
+
+  .score-grade {
+    font-size: 22px;
+  }
+
+  .score-number {
+    font-size: 28px;
+  }
+
+  .dimension-score {
+    font-size: 22px;
+  }
+
+  /* Dimension cards: 2-column grid on mobile */
+  .ant-col-xs-12 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+

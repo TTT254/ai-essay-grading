@@ -1,0 +1,278 @@
+.submit-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.upload-section {
+  position: relative;
+  min-height: 300px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.image-preview {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.ocr-result {
+  margin-top: 24px;
+  padding: 16px;
+  background: #e6f7ff;
+  border-radius: 8px;
+  border: 1px solid #91d5ff;
+}
+
+.ocr-text {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.editor-section {
+  min-height: 500px;
+}
+
+.word-count {
+  text-align: right;
+  color: #999;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.submit-actions {
+  margin-top: 24px;
+  text-align: right;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Quill编辑器样式调整 */
+.ql-container {
+  font-size: 16px;
+}
+
+.ql-editor {
+  min-height: 400px;
+}
+
+/* TipTap编辑器样式 */
+.tiptap-editor-content {
+  min-height: 400px;
+  font-size: 16px;
+  line-height: 1.8;
+  padding: 12px 16px;
+  outline: none;
+}
+
+.tiptap-editor-content:focus {
+  outline: none;
+}
+
+.tiptap-editor-content p {
+  margin-bottom: 12px;
+}
+
+.tiptap-editor-content h1,
+.tiptap-editor-content h2,
+.tiptap-editor-content h3 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.tiptap-editor-content ul,
+.tiptap-editor-content ol {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.tiptap-editor-content .is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ProseMirror 内部样式 */
+.ProseMirror {
+  min-height: 400px;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ===== Word Count Bar ===== */
+
+.word-count-bar-wrap {
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+
+.word-count-label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.word-count-label.red    { color: #f5222d; }
+.word-count-label.orange { color: #fa8c16; }
+.word-count-label.green  { color: #52c41a; }
+.word-count-label.gray   { color: #999; }
+
+.word-count-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.word-count-progress-inner {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* ===== Writing Tips Sidebar ===== */
+
+.submit-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.submit-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.writing-tips-panel {
+  width: 240px;
+  flex-shrink: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  transition: width 0.25s ease;
+}
+
+.writing-tips-panel.collapsed {
+  width: 40px;
+}
+
+.writing-tips-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f0f5ff;
+  border-bottom: 1px solid #d6e4ff;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.writing-tips-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0066FF;
+}
+
+.writing-tips-body {
+  padding: 14px;
+}
+
+.writing-tip-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #444;
+}
+
+.writing-tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.writing-tip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0066FF;
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 1024px) {
+  .submit-page {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .submit-page {
+    max-width: 100%;
+  }
+
+  .upload-section {
+    min-height: 200px;
+  }
+
+  .editor-section {
+    min-height: 300px;
+  }
+
+  .ql-editor {
+    min-height: 300px;
+  }
+
+  .submit-actions {
+    text-align: center;
+  }
+
+  .submit-actions .ant-btn {
+    width: 100%;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .ocr-text {
+    max-height: 150px;
+  }
+}
+

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 Supabase 连接</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Supabase 连接测试</h1>
+    <div id="result"></div>
+
+    <script>
+        const SUPABASE_URL = 'https://ctcfcrdquyzxhlmbygfa.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0Y2ZjcmRxdXl6eGhsbWJ5Z2ZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxMzgwMDQsImV4cCI6MjA4MzcxNDAwNH0.0Q_vz8r9ufaRpHeosUH61q07A7ZW_FhV4Bo2Q6mv6_o';
+
+        const resultDiv = document.getElementById('result');
+
+        async function testConnection() {
+            try {
+                resultDiv.innerHTML = '<p>正在连接 Supabase...</p>';
+
+                // 创建客户端
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                resultDiv.innerHTML += '<p>✅ Supabase 客户端创建成功</p>';
+
+                // 测试查询 classes 表
+                resultDiv.innerHTML += '<p>正在查询 classes 表...</p>';
+                const { data: classes, error: classError } = await supabase
+                    .from('classes')
+                    .select('*')
+                    .limit(5);
+
+                if (classError) {
+                    resultDiv.innerHTML += `<p>❌ 查询 classes 表失败: ${classError.message}</p>`;
+                    console.error('Classes error:', classError);
+                } else {
+                    resultDiv.innerHTML += `<p>✅ 查询 classes 表成功，找到 ${classes.length} 条记录</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(classes, null, 2)}</pre>`;
+                }
+
+                // 测试注册
+                resultDiv.innerHTML += '<p>正在测试注册...</p>';
+                const testEmail = `test${Date.now()}@test.com`;
+                const testPassword = 'Test123456';
+
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                    email: testEmail,
+                    password: testPassword,
+                    options: {
+                        data: {
+                            name: '测试用户',
+                            role: 'student'
+                        }
+                    }
+                });
+
+                if (signUpError) {
+                    resultDiv.innerHTML += `<p>❌ 注册失败: ${signUpError.message}</p>`;
+                    console.error('SignUp error:', signUpError);
+                } else {
+                    resultDiv.innerHTML += `<p>✅ 注册成功！</p>`;
+                    resultDiv.innerHTML += `<p>用户邮箱: ${testEmail}</p>`;
+                    resultDiv.innerHTML += `<p>用户ID: ${signUpData.user?.id}</p>`;
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(signUpData, null, 2)}</pre>`;
+                }
+
+            } catch (err) {
+                resultDiv.innerHTML += `<p>❌ 发生错误: ${err.message}</p>`;
+                console.error('Error:', err);
+            }
+        }
+
+        // 页面加载后自动测试
+        window.addEventListener('load', testConnection);
+    </script>
+</body>
+</html>

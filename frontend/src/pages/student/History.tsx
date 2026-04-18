@@ -1,14 +1,15 @@
 /**
- * 学生提交历史页面
+ * 学生提交历史页面 — 含分数色标、统计栏、操作按钮
  */
 import React, { useEffect, useState } from 'react';
 import { Table, Tag, Button, Typography, Card, Checkbox, Modal, Row, Col, Statistic, Space } from 'antd';
-import { EyeOutlined, ClockCircleOutlined, SwapOutlined } from '@ant-design/icons';
+import { EyeOutlined, ClockCircleOutlined, SwapOutlined, MessageOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useStudentStore } from '../../store/studentStore';
 import api from '../../services/api';
 import dayjs from 'dayjs';
+import './History.css';
 
 const { Title, Text } = Typography;
 
@@ -25,6 +26,40 @@ interface SubmissionWithReport {
     comment?: string;
   } | null;
 }
+
+const getScoreClass = (score: number | undefined): string => {
+  if (score == null) return 'gray';
+  if (score >= 85) return 'green';
+  if (score >= 70) return 'blue';
+  if (score >= 60) return 'orange';
+  return 'red';
+};
+
+/** 迷你得分柱状图 — 用 inline SVG 渲染 4 个维度分数 */
+const ScoreSparkline: React.FC<{ scores?: { content: number; structure: number; language: number; writing: number } }> = ({ scores }) => {
+  if (!scores) return null;
+  const bars = [
+    { value: scores.content, max: 35 },
+    { value: scores.structure, max: 25 },
+    { value: scores.language, max: 25 },
+    { value: scores.writing, max: 15 },
+  ];
+  return (
+    <div className="score-sparkline">
+      {bars.map((b, i) => {
+        const pct = Math.round((b.value / b.max) * 100);
+        const height = Math.max(4, Math.round((pct / 100) * 20));
+        return (
+          <div
+            key={i}
+            className="score-sparkline-bar active"
+            style={{ height, background: pct >= 80 ? '#52c41a' : pct >= 60 ? '#0066FF' : '#fa8c16' }}
+          />
+        );
+      })}
+    </div>
+  );
+};
 
 const History: React.FC = () => {
   const navigate = useNavigate();
@@ -57,7 +92,6 @@ const History: React.FC = () => {
   const handleCheckboxChange = (id: string, checked: boolean) => {
     if (checked) {
       if (selectedIds.length >= 2) {
-        // Replace the first selected
         setSelectedIds([selectedIds[1], id]);
       } else {
         setSelectedIds([...selectedIds, id]);
@@ -80,7 +114,6 @@ const History: React.FC = () => {
       if (sub1 && sub2) {
         const withReport1: SubmissionWithReport = { ...sub1, report: res1?.data || res1 };
         const withReport2: SubmissionWithReport = { ...sub2, report: res2?.data || res2 };
-        // Sort by submitted_at: older first
         const sorted = [withReport1, withReport2].sort(
           (a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime()
         ) as [SubmissionWithReport, SubmissionWithReport];
@@ -105,12 +138,25 @@ const History: React.FC = () => {
     );
   };
 
+  // 统计数据
+  const gradedSubmissions = (submissions as SubmissionWithReport[]).filter(
+    (s) => s.grading_status === 'published' || s.grading_status === 'teacher_reviewed'
+  );
+  const scores = gradedSubmissions
+    .map((s) => (s as any).total_score ?? (s as any).report?.total_score)
+    .filter((v): v is number => typeof v === 'number');
+  const avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  const maxScore = scores.length > 0 ? Math.max(...scores) : null;
+
+  const canViewReport = (status: string) =>
+    status !== 'pending' && status !== 'submitted';
+
   const columns = [
     {
       title: '对比',
       key: 'compare',
       width: 60,
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: any) => (
         <Checkbox
           checked={selectedIds.includes(record.id)}
           onChange={(e) => handleCheckboxChange(record.id, e.target.checked)}
@@ -121,53 +167,82 @@ const History: React.FC = () => {
       title: '作文标题',
       dataIndex: 'assignment_title',
       key: 'assignment_title',
-      width: 200,
+      width: 180,
     },
     {
       title: '提交时间',
       dataIndex: 'submitted_at',
       key: 'submitted_at',
-      width: 180,
+      width: 160,
       render: (time: string) => dayjs(time).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: '字数',
       dataIndex: 'content',
       key: 'word_count',
-      width: 100,
+      width: 80,
       render: (content: string) => {
         const text = content.replace(/<[^>]*>/g, '').trim();
         return `${text.length}字`;
       },
     },
     {
+      title: '得分',
+      key: 'score',
+      width: 140,
+      render: (_: unknown, record: any) => {
+        const score: number | undefined =
+          record.total_score ?? record.report?.total_score ?? record.final_total_score;
+        const scoreClass = getScoreClass(score);
+        const scoreScores = record.scores ?? record.report?.scores;
+        return (
+          <div className="score-cell">
+            <span className={`score-badge ${scoreClass}`}>
+              {score != null ? `${score}分` : '—'}
+            </span>
+            <ScoreSparkline scores={scoreScores} />
+          </div>
+        );
+      },
+    },
+    {
       title: '批改状态',
       dataIndex: 'grading_status',
       key: 'grading_status',
-      width: 120,
+      width: 100,
       render: (status: string) => getStatusTag(status),
     },
     {
       title: '操作',
       key: 'action',
-      width: 200,
-      render: (_: any, record: any) => (
-        <>
+      width: 180,
+      render: (_: unknown, record: any) => (
+        <Space size={4}>
           <Button
             type="link"
+            size="small"
             icon={<EyeOutlined />}
             onClick={() => navigate(`/student/report/${record.id}`)}
-            disabled={record.grading_status === 'pending' || record.grading_status === 'submitted'}
+            disabled={!canViewReport(record.grading_status)}
           >
             查看报告
           </Button>
-        </>
+          <Button
+            type="link"
+            size="small"
+            icon={<MessageOutlined />}
+            onClick={() => navigate(`/student/ai-chat/${record.id}`)}
+            disabled={!canViewReport(record.grading_status)}
+          >
+            AI辅导
+          </Button>
+        </Space>
       ),
     },
   ];
 
   return (
-    <div className="page-container">
+    <div className="page-container history-page">
       <div className="page-header">
         <Title level={2}>提交历史</Title>
         <Space>
@@ -187,6 +262,22 @@ const History: React.FC = () => {
             </Button>
           )}
         </Space>
+      </div>
+
+      {/* 统计栏 */}
+      <div className="history-stats-bar">
+        <div className="history-stat-card">
+          <div className="history-stat-label">总提交数</div>
+          <div className="history-stat-value blue">{submissions.length}</div>
+        </div>
+        <div className="history-stat-card">
+          <div className="history-stat-label">平均分</div>
+          <div className="history-stat-value green">{avgScore != null ? avgScore : '—'}</div>
+        </div>
+        <div className="history-stat-card">
+          <div className="history-stat-label">最高分</div>
+          <div className="history-stat-value gold">{maxScore != null ? maxScore : '—'}</div>
+        </div>
       </div>
 
       <Card>

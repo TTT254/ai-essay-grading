@@ -1,8 +1,8 @@
 /**
  * 教师端布局组件 - 现代侧边栏设计
  */
-import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Badge, Tooltip, message } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Layout, Menu, Avatar, Dropdown, Badge, Tooltip, message, Popover, Button, List } from 'antd';
 import {
   TeamOutlined,
   FileTextOutlined,
@@ -24,17 +24,70 @@ import './TeacherLayout.css';
 
 const { Content, Sider } = Layout;
 
+interface Notification {
+  id: string;
+  title: string;
+  content: string;
+  read: boolean;
+  createdAt: string;
+}
+
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  {
+    id: '1',
+    title: '待批改提醒',
+    content: '班级「高三1班」有 5 篇作文待批改',
+    read: false,
+    createdAt: '2026-04-13',
+  },
+  {
+    id: '2',
+    title: '新作文提交',
+    content: '学生张三提交了作文《我的梦想》',
+    read: false,
+    createdAt: '2026-04-12',
+  },
+  {
+    id: '3',
+    title: '本周批改统计',
+    content: '本周批改统计：已批改 12 篇，平均分 78 分',
+    read: false,
+    createdAt: '2026-04-11',
+  },
+];
+
 const TeacherLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  const [bellOpen, setBellOpen] = useState(false);
+
+  // Reset bell popover on route change
+  useEffect(() => {
+    setBellOpen(false);
+  }, [location.pathname]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markRead = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
 
   const handleMenuNavigate = (path: string) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
+
+  const handleLogout = async () => {
     await logout();
     message.success('已退出登录');
     navigate('/login');
@@ -96,6 +149,60 @@ const TeacherLayout: React.FC = () => {
     if (path.startsWith('/teacher/grading')) return '/teacher/grading';
     return path;
   };
+
+  const notificationPopoverContent = (
+    <div style={{ width: 320 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ fontWeight: 600, fontSize: 14 }}>通知</span>
+        {unreadCount > 0 && (
+          <Button type="link" size="small" onClick={markAllRead} style={{ padding: 0, color: '#0066FF' }}>
+            全部已读
+          </Button>
+        )}
+      </div>
+      <List
+        dataSource={notifications}
+        renderItem={(item) => (
+          <List.Item
+            style={{
+              padding: '10px 0',
+              borderBottom: '1px solid #f0f0f0',
+              opacity: item.read ? 0.6 : 1,
+            }}
+            actions={
+              !item.read
+                ? [
+                    <Button
+                      key="read"
+                      type="link"
+                      size="small"
+                      onClick={() => markRead(item.id)}
+                      style={{ padding: 0, fontSize: 12, color: '#0066FF' }}
+                    >
+                      标记已读
+                    </Button>,
+                  ]
+                : []
+            }
+          >
+            <List.Item.Meta
+              title={
+                <span style={{ fontWeight: item.read ? 400 : 600, fontSize: 13, color: item.read ? '#999' : '#1A1A1A' }}>
+                  {item.title}
+                </span>
+              }
+              description={
+                <span style={{ fontSize: 12, color: item.read ? '#bbb' : '#666' }}>{item.content}</span>
+              }
+            />
+          </List.Item>
+        )}
+      />
+      {notifications.length === 0 && (
+        <div style={{ textAlign: 'center', color: '#999', padding: '20px 0', fontSize: 13 }}>暂无通知</div>
+      )}
+    </div>
+  );
 
   return (
     <Layout className="teacher-layout">
@@ -173,11 +280,19 @@ const TeacherLayout: React.FC = () => {
             <span className="header-logo-text">AI作文批改 - 教师端</span>
           </div>
           <div className="header-actions">
-            <Badge count={0} showZero={false}>
-              <button className="header-icon-btn" aria-label="通知">
-                <BellOutlined />
-              </button>
-            </Badge>
+            <Popover
+              content={notificationPopoverContent}
+              trigger="click"
+              open={bellOpen}
+              onOpenChange={setBellOpen}
+              placement="bottomRight"
+            >
+              <Badge count={unreadCount} size="small">
+                <button className="header-icon-btn" aria-label="通知">
+                  <BellOutlined />
+                </button>
+              </Badge>
+            </Popover>
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <div className="header-user-trigger">
                 <Avatar size={32} icon={<UserOutlined />} src={user?.avatar} />
@@ -188,7 +303,7 @@ const TeacherLayout: React.FC = () => {
         </div>
 
         {/* Content */}
-        <Content className="teacher-content">
+        <Content className="teacher-content page-content-animated">
           <EmailConfirmationBanner />
           <Outlet />
         </Content>

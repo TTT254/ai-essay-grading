@@ -1,0 +1,320 @@
+/* ============================================
+   注册页面 - 左右分栏品牌布局
+   设计理念：与登录页视觉一致，品牌统一
+   配色：#0066FF 科技蓝 + #F7F9FC 浅灰
+   ============================================ */
+
+/* 整体容器 */
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* ========== 左侧品牌展示区 ========== */
+.register-visual {
+  flex: 0 0 45%;
+  max-width: 640px;
+  background: linear-gradient(135deg, #0066FF 0%, #0044CC 50%, #003399 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 60px;
+}
+
+.register-visual::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+}
+
+.register-visual::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  bottom: -200px;
+  left: -200px;
+  animation: pulse 8s ease-in-out infinite;
+}
+
+/* Logo区域 */
+.register-visual .visual-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 480px;
+}
+
+.register-visual .logo-section { margin-bottom: 48px; }
+
+.register-visual .logo-icon {
+  font-size: 64px;
+  color: white;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.register-visual .logo-title {
+  color: white !important;
+  font-size: 36px !important;
+  font-weight: 700 !important;
+  margin-bottom: 12px !important;
+  letter-spacing: -0.5px;
+}
+
+.register-visual .logo-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ========== 价值卡片 ========== */
+.value-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.value-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.value-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.value-card-icon { font-size: 28px; color: white; flex-shrink: 0; margin-top: 2px; }
+.value-card-title { color: white; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.value-card-desc { color: rgba(255, 255, 255, 0.8); font-size: 13px; line-height: 1.5; }
+
+/* ========== 统计行 ========== */
+.register-stats-row {
+  display: flex;
+  gap: 32px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.register-stat-item { flex: 1; }
+.register-stat-value { color: white; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+.register-stat-label { color: rgba(255, 255, 255, 0.8); font-size: 12px; }
+
+/* ========== 右侧表单区 ========== */
+.register-form-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 60px;
+  background: #F7F9FC;
+  position: relative;
+  overflow-y: auto;
+}
+
+.register-form-section::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.03) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  pointer-events: none;
+}
+
+/* 返回首页按钮 */
+.register-form-section .back-home-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  color: #666;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.register-form-section .back-home-btn:hover { color: #0066FF; }
+
+/* ========== 注册卡片 ========== */
+.register-form-section .register-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  padding: 40px 36px;
+  border: 1px solid #E8ECF0;
+}
+
+/* 注册 header */
+.register-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.register-header h2 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 8px;
+}
+
+.register-header .ant-typography-secondary {
+  font-size: 14px;
+  color: #666;
+}
+
+/* ========== 表单样式 ========== */
+.register-card .ant-form-item { margin-bottom: 16px; }
+
+.register-card .ant-input-affix-wrapper,
+.register-card .ant-input,
+.register-card .ant-select-selector {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #D9D9D9;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.register-card .ant-select-selector { display: flex; align-items: center; }
+
+.register-card .ant-input-affix-wrapper:hover,
+.register-card .ant-input:hover,
+.register-card .ant-select-selector:hover { border-color: #0066FF; }
+
+.register-card .ant-input-affix-wrapper:focus,
+.register-card .ant-input-affix-wrapper-focused,
+.register-card .ant-select-focused .ant-select-selector {
+  border-color: #0066FF;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+}
+
+.register-card .ant-form-item-label > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ========== 验证码 ========== */
+.register-card .captcha-code {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #0066FF;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.register-card .captcha-code:hover { color: #0052CC; }
+
+/* ========== 注册按钮 ========== */
+.register-button {
+  width: 100%;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+  border: none;
+  margin-top: 4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.2);
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #0052CC 0%, #003399 100%);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ========== 底部链接 ========== */
+.register-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.login-link {
+  color: #0066FF;
+  font-weight: 600;
+  margin-left: 8px;
+  transition: all 0.3s ease;
+}
+
+.login-link:hover { color: #0052CC; text-decoration: underline; }
+
+/* ========== 版权信息 ========== */
+.register-tips {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #999;
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ========== 动画 ========== */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+/* ========== 响应式设计 ========== */
+@media (max-width: 1024px) {
+  .register-visual { flex: 0 0 40%; padding: 40px; }
+  .register-visual .logo-title { font-size: 30px !important; }
+}
+
+@media (max-width: 768px) {
+  .register-visual { display: none; }
+  .register-form-section { padding: 40px 24px; }
+  .register-form-section .register-card { padding: 36px 28px; }
+  .register-form-section .back-home-btn { top: 16px; right: 16px; }
+  .register-tips { position: static; transform: none; margin-top: 24px; }
+}
+
+@media (max-width: 480px) {
+  .register-form-section { padding: 32px 20px; }
+  .register-form-section .register-card { padding: 28px 20px; }
+  .register-header h2 { font-size: 22px; }
+  .register-card .ant-input-affix-wrapper,
+  .register-card .ant-input,
+  .register-card .ant-select-selector { height: 42px; }
+  .register-button { height: 42px; }
+}

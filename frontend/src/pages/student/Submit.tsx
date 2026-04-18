@@ -1,13 +1,14 @@
 /**
  * 学生作文提交页面
- * 支持手写图片上传OCR和在线编辑，含草稿自动保存
+ * 支持手写图片上传OCR和在线编辑，含草稿自动保存、实时字数统计、写作建议侧边栏
  */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, Button, Upload, message, Spin, Typography, Space, Tabs, Modal, Tooltip } from 'antd';
-import { InboxOutlined, SendOutlined, CameraOutlined, SaveOutlined } from '@ant-design/icons';
+import { InboxOutlined, SendOutlined, CameraOutlined, SaveOutlined, BulbOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
 import { useAuthStore } from '../../store/authStore';
 import { useStudentStore } from '../../store/studentStore';
 import './Submit.css';
@@ -25,11 +26,26 @@ interface DraftData {
   savedAt: string;
 }
 
+const WRITING_TIPS = [
+  '开头要有吸引力，用生动的场景或问题引入主题',
+  '注意段落结构，每段围绕一个中心意思展开',
+  '多用具体的例子和细节，避免空洞的描述',
+  '结尾要有总结或升华，呼应开头或点明主旨',
+];
+
+const getWordCountStatus = (count: number, min: number | undefined) => {
+  if (!min) return { color: 'gray', pct: 0 };
+  const pct = Math.min(Math.round((count / min) * 100), 100);
+  if (count < min * 0.6) return { color: 'red', pct };
+  if (count < min) return { color: 'orange', pct };
+  return { color: 'green', pct };
+};
+
 const Submit: React.FC = () => {
   const navigate = useNavigate();
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const { user } = useAuthStore();
-  const { submitEssay, uploadImage, ocrRecognize, isLoading } = useStudentStore();
+  const { submitEssay, uploadImage, ocrRecognize, isLoading, assignments } = useStudentStore();
 
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -40,19 +56,35 @@ const Submit: React.FC = () => {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [draftRestoreVisible, setDraftRestoreVisible] = useState(false);
   const [pendingDraft, setPendingDraft] = useState<DraftData | null>(null);
+  const [tipsCollapsed, setTipsCollapsed] = useState(false);
 
   const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'align': [] }],
-      ['clean']
+  // TipTap editor instance
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({ placeholder: '请输入作文内容...' }),
     ],
-  };
+    content: content,
+    onUpdate: ({ editor: e }) => {
+      setContent(e.getHTML());
+    },
+    editorProps: {
+      attributes: {
+        class: 'tiptap-editor-content',
+      },
+    },
+  });
+
+  // 当前作业信息（用于字数要求）
+  const currentAssignment = assignments.find((a) => a.id === assignmentId);
+  const wordCountMin = currentAssignment?.word_count_min;
+
+  // 纯文本字数
+  const plainText = content.replace(/<[^>]*>/g, '').trim();
+  const wordCount = plainText.length;
+  const wcStatus = getWordCountStatus(wordCount, wordCountMin);
 
   // 检查本地草稿
   useEffect(() => {
@@ -100,6 +132,7 @@ const Submit: React.FC = () => {
 
   const handleRestoreDraft = () => {
     if (pendingDraft) {
+      editor?.commands.setContent(pendingDraft.content);
       setContent(pendingDraft.content);
       setActiveTab('2');
     }
@@ -131,7 +164,9 @@ const Submit: React.FC = () => {
         const text = await ocrRecognize(url);
         if (text) {
           setOcrResult(text);
-          setContent(text);
+          const htmlContent = `<p>${text.replace(/\n/g, '</p><p>')}</p>`;
+          setContent(htmlContent);
+          editor?.commands.setContent(htmlContent);
           message.success('OCR识别成功');
           setActiveTab('2'); // 切换到编辑标签
         }
@@ -185,6 +220,8 @@ const Submit: React.FC = () => {
     return `${h}:${m}:${s}`;
   };
 
+  const wcBarColor = wcStatus.color === 'green' ? '#52c41a' : wcStatus.color === 'orange' ? '#fa8c16' : wcStatus.color === 'red' ? '#f5222d' : '#d9d9d9';
+
   return (
     <div className="page-container submit-page">
       <div className="page-header">
@@ -210,112 +247,157 @@ const Submit: React.FC = () => {
         </p>
       </Modal>
 
-      <Card>
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={[
-            {
-              key: '1',
-              label: (
-                <span>
-                  <CameraOutlined />
-                  上传手写作文
-                </span>
-              ),
-              children: (
-                <div className="upload-section">
-                  <Dragger {...uploadProps} disabled={uploading || recognizing}>
-                    <p className="ant-upload-drag-icon">
-                      <InboxOutlined />
-                    </p>
-                    <p className="ant-upload-text">点击或拖拽图片到此区域上传</p>
-                    <p className="ant-upload-hint">
-                      支持 JPG、PNG 等图片格式，上传后将自动进行OCR识别
-                    </p>
-                  </Dragger>
+      <div className="submit-layout">
+        <div className="submit-main">
+          <Card>
+            <Tabs
+              activeKey={activeTab}
+              onChange={setActiveTab}
+              items={[
+                {
+                  key: '1',
+                  label: (
+                    <span>
+                      <CameraOutlined />
+                      上传手写作文
+                    </span>
+                  ),
+                  children: (
+                    <div className="upload-section">
+                      <Dragger {...uploadProps} disabled={uploading || recognizing}>
+                        <p className="ant-upload-drag-icon">
+                          <InboxOutlined />
+                        </p>
+                        <p className="ant-upload-text">点击或拖拽图片到此区域上传</p>
+                        <p className="ant-upload-hint">
+                          支持 JPG、PNG 等图片格式，上传后将自动进行OCR识别
+                        </p>
+                      </Dragger>
 
-                  {(uploading || recognizing) && (
-                    <div className="loading-overlay">
-                      <Spin size="large" tip={recognizing ? "正在识别文字..." : "上传中..."} />
+                      {(uploading || recognizing) && (
+                        <div className="loading-overlay">
+                          <Spin size="large" tip={recognizing ? "正在识别文字..." : "上传中..."} />
+                        </div>
+                      )}
+
+                      {imageUrl && (
+                        <div className="image-preview">
+                          <Text strong>已上传图片：</Text>
+                          <img src={imageUrl} alt="作文图片" style={{ maxWidth: '100%', marginTop: 16 }} />
+                        </div>
+                      )}
+
+                      {ocrResult && (
+                        <div className="ocr-result">
+                          <Text strong>OCR识别结果：</Text>
+                          <div className="ocr-text">{ocrResult}</div>
+                          <Button
+                            type="link"
+                            onClick={() => setActiveTab('2')}
+                          >
+                            去编辑
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  {imageUrl && (
-                    <div className="image-preview">
-                      <Text strong>已上传图片：</Text>
-                      <img src={imageUrl} alt="作文图片" style={{ maxWidth: '100%', marginTop: 16 }} />
+                  ),
+                },
+                {
+                  key: '2',
+                  label: '在线编辑',
+                  children: (
+                    <div className="editor-section">
+                      <EditorContent
+                        editor={editor}
+                        style={{ height: '400px', marginBottom: '60px' }}
+                      />
+                      {/* 实时字数统计 */}
+                      <div className="word-count-bar-wrap">
+                        <div className={`word-count-label ${wcStatus.color}`}>
+                          <span>
+                            已写 <strong>{wordCount}</strong> 字
+                            {wordCountMin ? ` / 最少 ${wordCountMin} 字` : ''}
+                          </span>
+                          {wordCountMin && wordCount >= wordCountMin && (
+                            <span style={{ fontSize: 12 }}>达标</span>
+                          )}
+                        </div>
+                        {wordCountMin && (
+                          <div className="word-count-progress">
+                            <div
+                              className="word-count-progress-inner"
+                              style={{ width: `${wcStatus.pct}%`, background: wcBarColor }}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  ),
+                },
+              ]}
+            />
 
-                  {ocrResult && (
-                    <div className="ocr-result">
-                      <Text strong>OCR识别结果：</Text>
-                      <div className="ocr-text">{ocrResult}</div>
-                      <Button
-                        type="link"
-                        onClick={() => setActiveTab('2')}
-                      >
-                        去编辑
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ),
-            },
-            {
-              key: '2',
-              label: '在线编辑',
-              children: (
-                <div className="editor-section">
-                  <ReactQuill
-                    theme="snow"
-                    value={content}
-                    onChange={setContent}
-                    modules={modules}
-                    placeholder="请输入作文内容..."
-                    style={{ height: '400px', marginBottom: '60px' }}
-                  />
-                  <div className="word-count">
-                    字数：{content.replace(/<[^>]*>/g, '').trim().length}
-                  </div>
-                </div>
-              ),
-            },
-          ]}
-        />
-
-        <div className="submit-actions">
-          <Space>
-            {lastSavedAt && (
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                草稿已保存 {formatSavedTime(lastSavedAt)}
-              </Text>
-            )}
-            <Button onClick={() => navigate('/student/tasks')}>
-              取消
-            </Button>
-            <Tooltip title="保存草稿到本地">
-              <Button
-                icon={<SaveOutlined />}
-                onClick={handleManualSave}
-                disabled={!content.trim()}
-              >
-                保存草稿
-              </Button>
-            </Tooltip>
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSubmit}
-              loading={isLoading}
-              disabled={!content.trim()}
-            >
-              提交作文
-            </Button>
-          </Space>
+            <div className="submit-actions">
+              <Space>
+                {lastSavedAt && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    草稿已保存 {formatSavedTime(lastSavedAt)}
+                  </Text>
+                )}
+                <Button onClick={() => navigate('/student/tasks')}>
+                  取消
+                </Button>
+                <Tooltip title="保存草稿到本地">
+                  <Button
+                    icon={<SaveOutlined />}
+                    onClick={handleManualSave}
+                    disabled={!content.trim()}
+                  >
+                    保存草稿
+                  </Button>
+                </Tooltip>
+                <Button
+                  type="primary"
+                  icon={<SendOutlined />}
+                  onClick={handleSubmit}
+                  loading={isLoading}
+                  disabled={!content.trim()}
+                >
+                  提交作文
+                </Button>
+              </Space>
+            </div>
+          </Card>
         </div>
-      </Card>
+
+        {/* 写作建议侧边栏 */}
+        <div className={`writing-tips-panel${tipsCollapsed ? ' collapsed' : ''}`}>
+          <div className="writing-tips-toggle" onClick={() => setTipsCollapsed(!tipsCollapsed)}>
+            {!tipsCollapsed && (
+              <>
+                <span className="writing-tips-toggle-label">
+                  <BulbOutlined style={{ marginRight: 6 }} />
+                  写作建议
+                </span>
+                <LeftOutlined style={{ fontSize: 12, color: '#0066FF' }} />
+              </>
+            )}
+            {tipsCollapsed && (
+              <RightOutlined style={{ fontSize: 12, color: '#0066FF', margin: '0 auto' }} />
+            )}
+          </div>
+          {!tipsCollapsed && (
+            <div className="writing-tips-body">
+              {WRITING_TIPS.map((tip, i) => (
+                <div key={i} className="writing-tip-item">
+                  <div className="writing-tip-dot" />
+                  <span>{tip}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

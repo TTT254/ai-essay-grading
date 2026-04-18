@@ -1,0 +1,659 @@
+/* ============================================
+   首页 - Landing Page
+   设计理念：Less is More（少即是多）
+   参考：Stripe, Linear, Vercel
+   配色：Primary Blue 主蓝 + 大量留白
+   ============================================ */
+
+.home-container {
+  min-height: 100vh;
+  background: var(--bg-color);
+}
+
+/* ========== 导航栏 ========== */
+.home-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  background: rgba(248, 250, 252, 0.8);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.home-navbar.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.navbar-logo .anticon {
+  font-size: 28px;
+  color: var(--primary-color);
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ========== Hero 区域 ========== */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 120px 48px 80px;
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 60px;
+  background: radial-gradient(circle at 50% 0%, #E0F2FE 0%, var(--bg-color) 60%);
+}
+
+.hero-content {
+  flex: 1;
+  text-align: left;
+  max-width: 600px;
+}
+
+.hero-demo {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-demo-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  transform: perspective(1000px) rotateY(-5deg) rotateX(3deg);
+  width: 380px;
+  border: 1px solid var(--border-color);
+}
+
+.demo-score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.demo-score-item:last-child {
+  border-bottom: none;
+}
+
+.demo-score-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.demo-score-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.demo-comment {
+  margin-top: 16px;
+  padding: 16px;
+  background: #F0F7FF;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.demo-comment-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 8px;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(0, 102, 255, 0.06);
+  border: 1px solid rgba(0, 102, 255, 0.1);
+  border-radius: 100px;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 32px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.hero-title {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  letter-spacing: -0.03em;
+  animation: fadeInUp 0.6s ease-out 0.1s backwards;
+}
+
+.hero-gradient-text {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-description {
+  font-size: clamp(18px, 2.5vw, 22px);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 640px;
+  margin-bottom: 48px;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.6s ease-out 0.3s backwards;
+}
+
+.cta-primary {
+  height: 52px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md) !important;
+  background: var(--primary-color) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25) !important;
+  transition: all 0.3s ease !important;
+}
+
+.cta-primary:hover {
+  background: var(--primary-hover) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3) !important;
+}
+
+.cta-secondary {
+  height: 52px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  background: var(--card-bg) !important;
+  transition: all 0.3s ease !important;
+}
+
+.cta-secondary:hover {
+  border-color: var(--primary-color) !important;
+  color: var(--primary-color) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ========== 使用流程区域 ========== */
+.workflow-section {
+  padding: 120px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 60px;
+}
+
+.workflow-step {
+  text-align: center;
+  padding: 40px 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.workflow-step:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.step-number {
+  font-size: 48px;
+  font-weight: 800;
+  color: rgba(0, 102, 255, 0.1);
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.step-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #60A5FA 100%);
+  border-radius: 16px;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
+}
+
+.step-icon .anticon {
+  font-size: 28px;
+  color: white;
+}
+
+.step-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.step-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ========== 特性区域 ========== */
+.features-section {
+  padding: 120px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 80px;
+}
+
+.section-title {
+  font-size: clamp(32px, 4vw, 42px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.section-description {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 60px;
+}
+
+.feature-card {
+  padding: 40px 32px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.feature-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #60A5FA 100%);
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  box-shadow: 0 4px 10px rgba(0, 102, 255, 0.2);
+}
+
+.feature-icon svg {
+  font-size: 24px;
+  color: white;
+}
+
+.feature-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.feature-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ========== 角色引导区 ========== */
+.roles-section {
+  padding: 120px 48px;
+  background: linear-gradient(180deg, var(--bg-color) 0%, #EFF6FF 100%);
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  max-width: 1000px;
+  margin: 60px auto 0;
+}
+
+.role-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  transition: all 0.3s ease;
+}
+
+.role-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.role-icon {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.role-icon .anticon {
+  font-size: 32px;
+  color: white;
+}
+
+.role-icon-student {
+  background: linear-gradient(135deg, #0066FF 0%, #60A5FA 100%);
+}
+
+.role-icon-teacher {
+  background: linear-gradient(135deg, #10B981 0%, #6EE7B7 100%);
+}
+
+.role-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.role-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.role-features li {
+  padding: 10px 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.role-features li::before {
+  content: '✓';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 102, 255, 0.1);
+  color: var(--primary-color);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ========== CTA 区域 ========== */
+.cta-section {
+  padding: 120px 24px;
+  background: linear-gradient(180deg, var(--bg-color) 0%, #EFF6FF 100%);
+}
+
+.cta-container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.cta-title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.cta-subtitle {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-stats {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+.cta-stat-item {
+  text-align: center;
+}
+
+.cta-stat-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.cta-stat-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ========== Footer ========== */
+.home-footer {
+  padding: 60px 24px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-color);
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ========== 动画 ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== 响应式设计 ========== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .home-navbar {
+    padding: 14px 32px;
+  }
+
+  .hero-section {
+    padding: 100px 32px 60px;
+    gap: 40px;
+  }
+
+  .workflow-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .roles-grid {
+    gap: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-navbar {
+    padding: 12px 20px;
+  }
+
+  .hero-section {
+    flex-direction: column;
+    padding: 100px 20px 60px;
+    gap: 40px;
+    min-height: auto;
+  }
+
+  .hero-content {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .hero-demo-card {
+    width: 100%;
+    max-width: 320px;
+    transform: none;
+  }
+
+  .hero-title {
+    margin-bottom: 20px;
+  }
+
+  .hero-description {
+    margin-bottom: 32px;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cta-primary,
+  .cta-secondary {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .workflow-section,
+  .roles-section {
+    padding: 80px 20px;
+  }
+
+  .workflow-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .features-section {
+    padding: 80px 20px;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .feature-card {
+    padding: 24px 20px;
+  }
+
+  .cta-section {
+    padding: 80px 20px;
+  }
+
+  .cta-stats {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-buttons .cta-primary,
+  .cta-buttons .cta-secondary {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+
