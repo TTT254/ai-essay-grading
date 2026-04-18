@@ -1,4 +1,4 @@
-<![CDATA[# AI 作文批改系统
+# AI 作文批改系统
 
 <p align="center">
   <strong>🎓 面向 K-12 教育场景的 AI 作文智能批改平台</strong>
@@ -13,15 +13,11 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow" alt="MIT License" />
 </p>
 
----
-
 ## 📖 项目简介
 
 学生在线编辑或拍照上传手写作文，系统通过阿里云百炼 AI 进行**多维度智能批改**（内容、结构、语言、书写），教师可审核 AI 批改结果并进行二次修改。同时提供学情数据可视化、AI 对话辅导和智能错题本功能。
 
 **核心价值：** 让学生获得即时、专业、多维度的作文反馈——减轻教师批改负担的同时，为每个学生提供个性化的写作指导。
-
----
 
 ## ✨ 功能特性
 
@@ -52,121 +48,100 @@
 </p>
 <p align="center"><em>登录页 & 注册页 - 支持学生/教师角色选择</em></p>
 
-### 学生端
-
-<p align="center">
-  <img src="docs/screenshots/04-student-tasks.png" width="80%" alt="作业列表" />
-</p>
-<p align="center"><em>作业列表 - 查看待完成的写作任务</em></p>
-
-<p align="center">
-  <img src="docs/screenshots/05-student-submit.png" width="80%" alt="提交作文" />
-</p>
-<p align="center"><em>作文提交 - 富文本编辑器 + 图片上传 OCR</em></p>
-
-<p align="center">
-  <img src="docs/screenshots/06-student-history.png" width="80%" alt="历史记录" />
-</p>
-<p align="center"><em>提交历史 - 查看所有作文的批改状态</em></p>
-
-<p align="center">
-  <img src="docs/screenshots/07-ai-chat.png" width="80%" alt="AI对话辅导" />
-</p>
-<p align="center"><em>AI 对话辅导 - 针对作文内容的个性化写作指导</em></p>
-
-<p align="center">
-  <img src="docs/screenshots/08-mistakes.png" width="80%" alt="智能错题本" />
-</p>
-<p align="center"><em>智能错题本 - 自动归类错误，支持标记掌握</em></p>
-
 ### 教师端
 
 <p align="center">
-  <img src="docs/screenshots/09-teacher-classes.png" width="80%" alt="班级管理" />
+  <img src="docs/screenshots/04-teacher-classes.png" width="80%" alt="班级管理" />
 </p>
 <p align="center"><em>班级管理 - 创建和管理教学班级</em></p>
 
+<!-- PLACEHOLDER_TEACHER_SECTION -->
+
 <p align="center">
-  <img src="docs/screenshots/10-teacher-assignments.png" width="80%" alt="作业管理" />
+  <img src="docs/screenshots/05-teacher-assignments.png" width="80%" alt="作业管理" />
 </p>
 <p align="center"><em>作业管理 - 布置写作任务、设置截止时间</em></p>
 
 <p align="center">
-  <img src="docs/screenshots/11-teacher-dashboard.png" width="80%" alt="数据看板" />
+  <img src="docs/screenshots/06-teacher-dashboard.png" width="80%" alt="数据看板" />
 </p>
 <p align="center"><em>数据看板 - 班级学情分析与统计</em></p>
+
+### 学生端
+
+<p align="center">
+  <img src="docs/screenshots/07-student-tasks.png" width="80%" alt="作业列表" />
+</p>
+<p align="center"><em>作业列表 - 查看待完成的写作任务</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/08-student-submit.png" width="80%" alt="提交作文" />
+</p>
+<p align="center"><em>作文提交 - 富文本编辑器 + 图片上传 OCR</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/09-student-history.png" width="80%" alt="历史记录" />
+</p>
+<p align="center"><em>提交历史 - 查看所有作文的批改状态</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/10-student-mistakes.png" width="80%" alt="智能错题本" />
+</p>
+<p align="center"><em>智能错题本 - 自动归类错误，支持标记掌握</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/11-student-profile.png" width="80%" alt="个人中心" />
+</p>
+<p align="center"><em>个人中心 - 学习数据统计与成长曲线</em></p>
 
 ---
 
 ## 🏗️ 系统架构
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        用户层 (Browser)                          │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
-│  │   学生端     │  │   教师端     │  │      公共页面            │ │
-│  │  /student/* │  │  /teacher/* │  │  /, /login, /register   │ │
-│  └──────┬──────┘  └──────┬──────┘  └────────────┬────────────┘ │
-│         │                │                      │               │
-├─────────┴────────────────┴──────────────────────┴───────────────┤
-│                    前端 (React 19 + TypeScript)                   │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐   │
-│  │  Zustand  │  │  Axios   │  │  Ant Design│  │  ECharts     │   │
-│  │  状态管理  │  │  HTTP    │  │  UI 组件库 │  │  数据可视化   │   │
-│  └─────┬────┘  └────┬─────┘  └──────────┘  └───────────────┘   │
-│        │             │                                           │
-├────────┴─────────────┴───────────────────────────────────────────┤
-│                                                                   │
-│                    后端 (FastAPI + Python)                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │
-│  │ /api/auth │  │/api/student│ │/api/teacher│ │/api/grading  │    │
-│  └─────┬────┘  └─────┬────┘  └─────┬────┘  └──────┬───────┘    │
-│        │              │             │               │             │
-│  ┌─────┴──────────────┴─────────────┴───────────────┴──────┐    │
-│  │                   Service Layer                           │    │
-│  │  ┌─────────────────┐  ┌──────────────────────────────┐  │    │
-│  │  │ SupabaseService  │  │     DashScopeService         │  │    │
-│  │  │  (数据库 CRUD)   │  │  (AI 批改 / OCR / 对话)      │  │    │
-│  │  └────────┬─────────┘  └──────────────┬───────────────┘  │    │
-│  └───────────┼───────────────────────────┼───────────────────┘    │
-│              │                           │                         │
-├──────────────┼───────────────────────────┼─────────────────────────┤
-│              ▼                           ▼                         │
-│  ┌─────────────────────┐    ┌─────────────────────────┐          │
-│  │   Supabase          │    │   阿里云百炼 DashScope    │          │
-│  │  ┌───────────────┐  │    │  ┌───────────────────┐  │          │
-│  │  │  PostgreSQL   │  │    │  │  qwen-plus (文本)  │  │          │
-│  │  │  Auth         │  │    │  │  qwen-vl-plus(视觉)│  │          │
-│  │  │  Storage      │  │    │  └───────────────────┘  │          │
-│  │  └───────────────┘  │    └─────────────────────────┘          │
-│  └─────────────────────┘                                          │
-└───────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph 用户层
+        Browser[浏览器]
+    end
+    subgraph 前端["前端 (React 19 + TypeScript)"]
+        StudentUI[学生端 /student/*]
+        TeacherUI[教师端 /teacher/*]
+        PublicUI[公共页面 /, /login, /register]
+    end
+    subgraph 后端["后端 (FastAPI + Python)"]
+        AuthAPI[/api/auth]
+        StudentAPI[/api/student]
+        TeacherAPI[/api/teacher]
+        GradingAPI[/api/grading]
+        ChatAPI[/api/ai-chat]
+    end
+    subgraph 外部服务
+        Supabase[(Supabase<br/>PostgreSQL + Auth + Storage)]
+        DashScope[阿里云百炼<br/>qwen-plus / qwen-vl-plus]
+    end
+
+    Browser --> StudentUI & TeacherUI & PublicUI
+    StudentUI & TeacherUI & PublicUI --> AuthAPI & StudentAPI & TeacherAPI & GradingAPI & ChatAPI
+    AuthAPI & StudentAPI & TeacherAPI & GradingAPI & ChatAPI --> Supabase
+    GradingAPI & ChatAPI --> DashScope
 ```
 
 ---
 
 ## 📋 业务流程
 
-```
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│  教师布置  │────▶│  学生提交  │────▶│  AI 批改  │────▶│  教师审核  │
-│  写作任务  │     │  作文内容  │     │  自动评分  │     │  二次修改  │
-└──────────┘     └──────────┘     └──────────┘     └─────┬────┘
-                       │                                   │
-                       ▼                                   ▼
-                 ┌──────────┐                       ┌──────────┐
-                 │  OCR识别  │                       │  发布报告  │
-                 │ (手写上传) │                       │  给学生    │
-                 └──────────┘                       └─────┬────┘
-                                                          │
-                      ┌───────────────────────────────────┤
-                      ▼                                   ▼
-                ┌──────────┐                       ┌──────────┐
-                │  AI 对话  │                       │  错题归档  │
-                │  写作辅导  │                       │  智能错题本│
-                └──────────┘                       └──────────┘
+```mermaid
+graph LR
+    A[教师布置作业] --> B[学生提交作文]
+    B --> C{提交方式}
+    C -->|在线编辑| D[富文本编辑器]
+    C -->|拍照上传| E[OCR 识别]
+    D --> F[AI 智能批改]
+    E --> F
+    F --> G[教师审核]
+    G --> H[发布报告]
+    H --> I[AI 对话辅导]
+    H --> J[错题归档]
 ```
 
 ### AI 批改评分维度
@@ -188,7 +163,7 @@
 - **状态管理**: Zustand 5 (with persist)
 - **构建工具**: Vite 7
 - **图表**: ECharts 5
-- **富文本**: React Quill
+- **富文本**: TipTap (ProseMirror)
 - **测试**: Playwright (E2E)
 
 ### 后端
@@ -326,4 +301,3 @@ MIT License
 **阿东** - 大模型算法工程师，OPC创业者
 
 基于 Vibe Coding CN 方法论构建
-]]>
