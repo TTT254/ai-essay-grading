@@ -188,7 +188,7 @@ graph LR
 ### 1. 克隆项目
 
 ```bash
-git clone git@github.com:adongwanai/ai-essay-grading.git
+git clone https://github.com/TTT254/ai-essay-grading.git
 cd ai-essay-grading
 ```
 
@@ -299,6 +299,6 @@ MIT License
 
 ## 👤 作者
 
-**阿东** - 大模型算法工程师，OPC创业者
+**陶诗媛**
 
 基于 Vibe Coding CN 方法论构建
