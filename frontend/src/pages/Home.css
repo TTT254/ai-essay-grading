@@ -313,22 +313,22 @@
   margin-top: 60px;
 }
 
-.feature-card {
+.features-section .feature-card {
   padding: 40px 32px;
-  background: var(--card-bg);
+  background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   transition: all 0.3s ease;
   cursor: default;
 }
 
-.feature-card:hover {
+.features-section .feature-card:hover {
   border-color: var(--primary-color);
   box-shadow: var(--shadow-lg);
   transform: translateY(-4px);
 }
 
-.feature-icon {
+.features-section .feature-icon {
   width: 56px;
   height: 56px;
   display: flex;
@@ -340,22 +340,23 @@
   box-shadow: 0 4px 10px rgba(0, 102, 255, 0.2);
 }
 
-.feature-icon svg {
+.features-section .feature-icon svg,
+.features-section .feature-icon .anticon {
   font-size: 24px;
   color: white;
 }
 
-.feature-title {
+.features-section .feature-title {
   font-size: 20px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #0F172A;
   margin-bottom: 12px;
 }
 
-.feature-description {
+.features-section .feature-description {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: #64748B;
 }
 
 /* ========== 角色引导区 ========== */

@@ -291,6 +291,15 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ---
 
+## 🔑 演示账号
+
+| 角色 | 邮箱 | 密码 |
+|------|------|------|
+| 教师 | `teacher@demo.com` | `demo123456` |
+| 学生 | `student@demo.com` | `demo123456` |
+
+---
+
 ## 📄 开源协议
 
 MIT License

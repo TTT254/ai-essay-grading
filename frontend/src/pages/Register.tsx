@@ -17,7 +17,6 @@ import {
 } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { classService } from '../services/supabase';
 import api from '../services/api';
 import './Register.css';
 
@@ -64,19 +63,9 @@ const Register: React.FC = () => {
   // 加载班级列表
   const loadClasses = async () => {
     try {
-      console.log('📚 [Register] 开始加载班级列表...');
-      const { data, error } = await classService.getClasses();
-      console.log('📚 [Register] 班级列表返回', { data, error });
-
-      if (error) {
-        console.error('❌ [Register] 加载班级失败', error);
-        throw error;
-      }
-
-      console.log('✅ [Register] 班级列表加载成功', data?.length, '个班级');
-      setClasses(data || []);
+      const result = await api.auth.getClasses();
+      setClasses(result.data || []);
     } catch (err: any) {
-      console.error('❌ [Register] 加载班级异常', err);
       message.error(`加载班级列表失败: ${err.message || '未知错误'}`);
     }
   };

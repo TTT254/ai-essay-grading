@@ -173,6 +173,10 @@ export const api = {
     // 验证验证码
     verifyCaptcha: (captchaId: string, code: string) =>
       api.post('/api/auth/verify-captcha', { captcha_id: captchaId, code }),
+
+    // 获取所有班级（注册时使用，无需认证）
+    getClasses: () =>
+      api.get('/api/auth/classes'),
   },
 
   // AI对话API

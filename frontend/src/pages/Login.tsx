@@ -29,10 +29,11 @@ interface CaptchaData {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { login, error, clearError, isAuthenticated, isLoading } = useAuthStore();
   const [form] = Form.useForm();
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // 如果已登录，跳转到首页
@@ -66,6 +67,7 @@ const Login: React.FC = () => {
   // 处理登录
   const handleSubmit = async (values: any) => {
     setSubmitError(null);
+    setSubmitLoading(true);
     try {
       // 先验证验证码
       if (captcha) {
@@ -76,6 +78,7 @@ const Login: React.FC = () => {
           message.error(reason);
           setSubmitError(reason);
           loadCaptcha();
+          setSubmitLoading(false);
           return;
         }
       }
@@ -99,6 +102,7 @@ const Login: React.FC = () => {
         message.error(reason);
         setSubmitError(reason);
         loadCaptcha(); // 刷新验证码
+        setSubmitLoading(false);
       }
     } catch (err: any) {
       console.error('Login error:', err);
@@ -106,6 +110,7 @@ const Login: React.FC = () => {
       message.error(reason);
       setSubmitError(reason);
       loadCaptcha(); // 刷新验证码
+      setSubmitLoading(false);
     }
   };
 

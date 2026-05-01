@@ -9,6 +9,7 @@ import string
 from datetime import datetime, timedelta
 from typing import Dict
 import uuid
+from external.supabase_service import supabase_service
 
 router = APIRouter(prefix="/auth", tags=["认证"])
 
@@ -121,3 +122,37 @@ async def health_check():
         "status": "ok",
         "captcha_count": len(captcha_store),
     }
+
+
+@router.get("/classes")
+async def get_all_classes():
+    """获取所有班级列表（注册时使用，无需认证）"""
+    classes = await supabase_service.get_all_classes()
+    return {"success": True, "data": classes}
+
+
+@router.post("/seed-classes")
+async def seed_classes():
+    """初始化班级数据（仅在班级为空时执行）"""
+    try:
+        existing = await supabase_service.get_all_classes()
+        if existing:
+            return {"success": True, "message": f"已有 {len(existing)} 个班级，跳过", "count": len(existing)}
+
+        classes = []
+        for grade in range(1, 7):
+            for cls_name in ["1班", "2班", "3班"]:
+                classes.append({"grade": grade, "name": cls_name})
+        for grade in range(7, 10):
+            for cls_name in ["1班", "2班", "3班"]:
+                classes.append({"grade": grade, "name": cls_name})
+
+        try:
+            res = supabase_service.client.table("classes").insert(classes).execute()
+            return {"success": True, "message": f"创建了 {len(res.data)} 个班级", "count": len(res.data)}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"插入班级失败: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"初始化失败: {str(e)}")
