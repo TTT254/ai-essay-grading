@@ -35,8 +35,8 @@ env/
 *.sqlite3
 *.sqlite
 
-# Environment variables
-.env
+# Environment variables (本项目为教学演示，.env 已提交仓库)
+# .env
 .env.local
 .env.*.local
 
