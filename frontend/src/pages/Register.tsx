@@ -1,7 +1,7 @@
 /**
  * 注册页面
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Card, Typography, Select, Radio, Modal } from 'antd';
 import {
   UserOutlined,
@@ -42,6 +42,7 @@ const Register: React.FC = () => {
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(false);
   const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const initRef = useRef(false);
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
@@ -71,8 +72,11 @@ const Register: React.FC = () => {
   };
 
   useEffect(() => {
-    loadCaptcha();
-    loadClasses();
+    if (!initRef.current) {
+      initRef.current = true;
+      loadCaptcha();
+      loadClasses();
+    }
     return () => clearError();
   }, []);
 

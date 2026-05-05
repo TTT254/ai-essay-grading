@@ -1,7 +1,7 @@
 /**
  * 登录页面 - 商业化版本
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, Input, Button, message, Card, Typography, Alert } from 'antd';
 import {
   UserOutlined,
@@ -34,6 +34,7 @@ const Login: React.FC = () => {
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const captchaLoadedRef = useRef(false);
 
   // 如果已登录，跳转到首页
   useEffect(() => {
@@ -59,7 +60,10 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    loadCaptcha();
+    if (!captchaLoadedRef.current) {
+      captchaLoadedRef.current = true;
+      loadCaptcha();
+    }
     return () => clearError();
   }, []);
 
