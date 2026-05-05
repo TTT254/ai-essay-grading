@@ -164,8 +164,5 @@ echo ""
 echo "按 Ctrl+C 停止所有服务"
 echo "======================================"
 
-# 等待子进程（任一退出则全部停止）
-wait -n $BACKEND_PID $FRONTEND_PID 2>/dev/null
-echo ""
-echo "⚠️  有服务意外退出，正在停止所有服务..."
-cleanup
+# 保持脚本运行，等待后端进程
+wait $BACKEND_PID 2>/dev/null
