@@ -37,7 +37,7 @@ interface Class {
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { register, isLoading, error, clearError } = useAuthStore();
+  const { register, isLoading, clearError } = useAuthStore();
   const [form] = Form.useForm();
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(false);
@@ -78,44 +78,28 @@ const Register: React.FC = () => {
 
   // 处理注册
   const handleSubmit = async (values: any) => {
-    console.log('📝 [Register] 提交注册表单', { email: values.email, role: values.role });
+    if (values.role === 'student' && !values.class_id) {
+      message.warning('学生请选择班级');
+      return;
+    }
+
+    const userData = {
+      name: values.name,
+      role: values.role,
+      class_id: values.role === 'student' ? values.class_id : undefined,
+    };
+
     try {
-      // 先验证验证码
-      if (captcha) {
-        try {
-          console.log('📝 [Register] 验证验证码...', captcha.captcha_id);
-          await api.auth.verifyCaptcha(captcha.captcha_id, values.captcha);
-          console.log('✅ [Register] 验证码验证成功');
-        } catch (captchaErr: any) {
-          console.error('❌ [Register] 验证码错误', captchaErr);
-          message.error('验证码错误，请重新输入');
-          loadCaptcha();
-          return;
-        }
-      }
-
-      // 注册
-      const userData = {
-        name: values.name,
-        role: values.role,
-        class_id: values.role === 'student' ? values.class_id : undefined,
-      };
-
-      console.log('📝 [Register] 开始注册...', { email: values.email, userData });
+      message.loading({ content: '正在注册，请稍候...', key: 'register', duration: 0 });
       const success = await register(values.email, values.password, userData);
-      console.log('📝 [Register] 注册结果', success);
+      message.destroy('register');
 
       if (success) {
-        console.log('✅ [Register] 注册成功，准备跳转');
-
-        // 检查是否已经自动登录（有 user 说明已登录）
+        // 检查是否已经自动登录
         const currentUser = useAuthStore.getState().user;
         const isLoggedIn = useAuthStore.getState().isAuthenticated;
 
-        console.log('📝 [Register] 当前登录状态', { isLoggedIn, currentUser });
-
         if (isLoggedIn && currentUser) {
-          // 已自动登录，跳转到对应角色页面
           Modal.success({
             title: '注册成功！',
             icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
@@ -132,7 +116,7 @@ const Register: React.FC = () => {
             },
           });
         } else {
-          // 注册成功但需要邮箱确认，跳转到登录页
+          // 注册成功但需要邮箱确认
           Modal.success({
             title: '注册成功！',
             icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
@@ -149,35 +133,14 @@ const Register: React.FC = () => {
           });
         }
       } else {
-        // 检查是否是邮箱确认相关的错误
-        const errMsg = error || '注册失败，请检查邮箱是否已被使用';
-
-        // 如果错误信息包含"Email not confirmed"，说明注册成功但需要确认邮箱
-        if (errMsg.toLowerCase().includes('email not confirmed') ||
-            errMsg.toLowerCase().includes('email confirmation')) {
-          console.log('📧 [Register] 注册成功但需要邮箱确认');
-          Modal.success({
-            title: '注册成功！',
-            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-            content: (
-              <div>
-                <p>您的账号已创建成功！</p>
-                <p>请查收邮箱确认邮件，确认后即可登录。</p>
-              </div>
-            ),
-            okText: '前往登录',
-            onOk: () => {
-              navigate('/login');
-            },
-          });
-        } else {
-          console.error('❌ [Register] 注册失败', errMsg);
-          message.error(errMsg);
-          loadCaptcha();
-        }
+        // 注册失败，从 store 获取最新错误信息
+        const storeError = useAuthStore.getState().error;
+        const errMsg = storeError || '注册失败，请检查邮箱是否已被使用';
+        message.error(errMsg);
+        loadCaptcha();
       }
     } catch (err: any) {
-      console.error('❌ [Register] 注册异常', err);
+      message.destroy('register');
       const errMsg = err.response?.data?.detail || err.message || '注册失败，请重试';
       message.error(errMsg);
       loadCaptcha();
@@ -276,6 +239,12 @@ const Register: React.FC = () => {
             form={form}
             name="register"
             onFinish={handleSubmit}
+            onFinishFailed={(errorInfo) => {
+              const firstField = errorInfo.errorFields[0]?.name[0];
+              if (firstField) {
+                message.warning(`请填写必填项：${errorInfo.errorFields.map(f => f.errors[0]).join('、')}`);
+              }
+            }}
             autoComplete="off"
             size="large"
             initialValues={{ role: 'student' }}
@@ -370,7 +339,6 @@ const Register: React.FC = () => {
                 <Form.Item
                   name="class_id"
                   label="班级"
-                  rules={[{ required: true, message: '请选择班级' }]}
                 >
                   <Select placeholder="选择班级">
                     {getClassesByGrade().map((cls) => (
@@ -385,11 +353,10 @@ const Register: React.FC = () => {
 
             <Form.Item
               name="captcha"
-              rules={[{ required: true, message: '请输入验证码' }]}
             >
               <Input
                 prefix={<SafetyOutlined />}
-                placeholder="验证码"
+                placeholder="验证码（选填）"
                 addonAfter={
                   <div
                     className="captcha-code"

@@ -60,7 +60,16 @@ const Grading: React.FC = () => {
     try {
       const response = await api.get(`/api/teacher/assignments/${assignmentId}/submissions`);
       const submissionsData = response?.data || response || [];
-      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
+      const list = Array.isArray(submissionsData) ? submissionsData : [];
+      setSubmissions(list);
+
+      // 如果当前有选中的提交，同步更新其状态
+      if (selectedSubmission) {
+        const updated = list.find((s: Submission) => s.id === selectedSubmission.id);
+        if (updated) {
+          setSelectedSubmission(updated);
+        }
+      }
     } catch (error) {
       message.error('加载提交列表失败');
       setSubmissions([]);
@@ -77,6 +86,9 @@ const Grading: React.FC = () => {
       setCurrentReport(reportData);
       setTeacherScores(reportData?.teacher_scores || {});
       setTeacherComment(reportData?.teacher_comment || '');
+      if (reportData && !reportData.teacher_scores?.total) {
+        setTeacherScores({ total: reportData.final_total_score || reportData.ai_total_score });
+      }
     } catch (error) {
       message.error('加载批改报告失败');
       setCurrentReport(null);
@@ -87,7 +99,9 @@ const Grading: React.FC = () => {
 
   const handleSelectSubmission = (submission: Submission) => {
     setSelectedSubmission(submission);
-    if (submission.grading_status !== 'pending') {
+    setCurrentReport(null); // 立即清除旧报告，避免显示上一个学生的状态
+    const status = submission.grading_status || (submission as any).status || 'pending';
+    if (status !== 'pending' && status !== 'submitted') {
       loadReport(submission.id);
     }
   };
@@ -99,16 +113,46 @@ const Grading: React.FC = () => {
     try {
       await api.grading.autoGrade(selectedSubmission.id);
       message.success('AI批改已完成');
-      await loadReport(selectedSubmission.id);
-      await loadSubmissions();
-    } catch (error) {
-      message.error('AI批改失败');
+
+      // 加载报告
+      try {
+        const response = await api.student.getReport(selectedSubmission.id);
+        const reportData = response?.data || response || null;
+        setCurrentReport(reportData);
+        setTeacherScores(reportData?.teacher_scores || {});
+        setTeacherComment(reportData?.teacher_comment || '');
+        if (reportData && !reportData.teacher_scores?.total) {
+          setTeacherScores({ total: reportData.final_total_score || reportData.ai_total_score });
+        }
+      } catch {
+        message.warning('报告加载失败，请点击学生重新查看');
+      }
+
+      // 刷新左侧列表
+      try {
+        const response = await api.get(`/api/teacher/assignments/${assignmentId}/submissions`);
+        const submissionsData = response?.data || response || [];
+        const list = Array.isArray(submissionsData) ? submissionsData : [];
+        setSubmissions(list);
+        const updated = list.find((s: Submission) => s.id === selectedSubmission.id);
+        if (updated) {
+          setSelectedSubmission(updated);
+        }
+      } catch {
+        // 列表刷新失败不影响主流程
+      }
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail || error?.message || '';
+      message.error(`AI批改失败${detail ? '：' + detail : ''}`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const ungradedCount = submissions.filter((s) => s.grading_status === 'pending' || s.status === 'submitted').length;
+  const ungradedCount = submissions.filter((s) => {
+    const status = s.grading_status || (s as any).status;
+    return status === 'pending' || status === 'submitted';
+  }).length;
 
   const handleBatchGrade = () => {
     if (ungradedCount === 0) {
@@ -139,27 +183,52 @@ const Grading: React.FC = () => {
   };
 
   const handleReview = async () => {
-    if (!currentReport) return;
+    if (!currentReport?.id) {
+      message.error('报告数据异常，无法审核');
+      return;
+    }
 
-    const success = await reviewReport(currentReport.id, {
-      teacher_scores: teacherScores,
-      teacher_comment: teacherComment,
-    });
+    setIsLoading(true);
+    try {
+      const success = await reviewReport(currentReport.id, {
+        teacher_scores: teacherScores,
+        teacher_comment: teacherComment,
+      });
 
-    if (success) {
-      message.success('审核成功');
-      await loadReport(selectedSubmission!.id);
+      if (success) {
+        message.success('审核成功');
+        await loadReport(selectedSubmission!.id);
+        await loadSubmissions(); // 刷新左侧列表状态
+      } else {
+        message.error('审核失败，请重试');
+      }
+    } catch {
+      message.error('审核请求失败');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handlePublish = async () => {
-    if (!currentReport) return;
+    if (!currentReport?.id) {
+      message.error('报告数据异常，无法发布');
+      return;
+    }
 
-    const success = await publishReport(currentReport.id);
-    if (success) {
-      message.success('报告已发布给学生');
-      await loadSubmissions();
-      await loadReport(selectedSubmission!.id);
+    setIsLoading(true);
+    try {
+      const success = await publishReport(currentReport.id);
+      if (success) {
+        message.success('报告已发布给学生');
+        await loadSubmissions();
+        await loadReport(selectedSubmission!.id);
+      } else {
+        message.error('发布失败，请重试');
+      }
+    } catch {
+      message.error('发布请求失败');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,7 +288,7 @@ const Grading: React.FC = () => {
                     title={
                       <Space>
                         <span>{item.student_name}</span>
-                        {getStatusTag(item.grading_status || item.status)}
+                        {getStatusTag(item.grading_status || (item as any).status || 'pending')}
                       </Space>
                     }
                     description={
@@ -258,7 +327,7 @@ const Grading: React.FC = () => {
                 {selectedSubmission.content}
               </Paragraph>
 
-              {(selectedSubmission.grading_status === 'pending' || selectedSubmission.grading_status === 'submitted') && (
+              {(['pending', 'submitted'].includes(selectedSubmission.grading_status || (selectedSubmission as any).status || 'pending')) && (
                 <div style={{ textAlign: 'center', marginTop: 32 }}>
                   <Button
                     type="primary"
@@ -285,19 +354,19 @@ const Grading: React.FC = () => {
                 <div>
                   <Text strong>总分：</Text>
                   <Text style={{ fontSize: 24, color: '#1890ff', marginLeft: 8 }}>
-                    {currentReport.total_score}
+                    {currentReport.final_total_score || currentReport.ai_total_score}
                   </Text>
                   <Text type="secondary"> / 100</Text>
                 </div>
-                {currentReport.scores && (
+                {(currentReport.final_scores || currentReport.ai_scores) && (
                   <div>
-                    <Text>内容：{currentReport.scores.content}分</Text>
+                    <Text>内容：{(currentReport.final_scores || currentReport.ai_scores)?.content}分</Text>
                     <br />
-                    <Text>结构：{currentReport.scores.structure}分</Text>
+                    <Text>结构：{(currentReport.final_scores || currentReport.ai_scores)?.structure}分</Text>
                     <br />
-                    <Text>语言：{currentReport.scores.language}分</Text>
+                    <Text>语言：{(currentReport.final_scores || currentReport.ai_scores)?.language}分</Text>
                     <br />
-                    <Text>书写：{currentReport.scores.writing}分</Text>
+                    <Text>书写：{(currentReport.final_scores || currentReport.ai_scores)?.writing}分</Text>
                   </div>
                 )}
               </Space>
@@ -305,10 +374,10 @@ const Grading: React.FC = () => {
               <Divider />
 
               <Title level={5}>错误列表</Title>
-              {currentReport.errors && currentReport.errors.length > 0 ? (
+              {currentReport.ai_errors && currentReport.ai_errors.length > 0 ? (
                 <List
                   size="small"
-                  dataSource={currentReport.errors}
+                  dataSource={currentReport.ai_errors}
                   renderItem={(error: any) => (
                     <List.Item>
                       <Space direction="vertical" size="small">
@@ -327,7 +396,7 @@ const Grading: React.FC = () => {
               <Divider />
 
               <Title level={5}>AI评语</Title>
-              <Paragraph>{currentReport.comment}</Paragraph>
+              <Paragraph>{currentReport.final_comment || currentReport.ai_comment}</Paragraph>
 
               <Divider />
 
@@ -338,7 +407,7 @@ const Grading: React.FC = () => {
                   <InputNumber
                     min={0}
                     max={100}
-                    value={teacherScores.total || currentReport.total_score}
+                    value={teacherScores.total || currentReport.final_total_score || currentReport.ai_total_score}
                     onChange={(val) => setTeacherScores({ ...teacherScores, total: val })}
                     style={{ marginLeft: 8 }}
                   />
@@ -359,7 +428,7 @@ const Grading: React.FC = () => {
                   <Button type="primary" onClick={handleReview} loading={isLoading}>
                     保存审核
                   </Button>
-                  {currentReport.status !== 'published' && (
+                  {!currentReport.published_at && (
                     <Button
                       type="primary"
                       danger
@@ -373,7 +442,11 @@ const Grading: React.FC = () => {
                 </Space>
               </Space>
             </div>
-          ) : selectedSubmission?.grading_status === 'pending' ? (
+          ) : isLoading && selectedSubmission ? (
+            <div style={{ textAlign: 'center', padding: '60px 0' }}>
+              <Spin tip="AI批改中，请稍候..." />
+            </div>
+          ) : selectedSubmission && ['pending', 'submitted'].includes(selectedSubmission.grading_status || (selectedSubmission as any).status || 'pending') ? (
             <Empty description="请先进行AI批改" />
           ) : (
             <Empty description="请选择一篇作文" />

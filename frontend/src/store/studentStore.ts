@@ -146,16 +146,17 @@ export const useStudentStore = create<StudentState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.student.getReport(submissionId);
-      // 后端返回格式: { success: true, data: {...} } 或直接返回对象
       const reportData = response.data || response || null;
       set({
         currentReport: reportData,
         isLoading: false,
       });
     } catch (error: any) {
+      const status = error?.response?.status;
+      const msg = status === 404 ? '报告不存在' : '获取报告失败，请稍后重试';
       set({
-        error: error.message || '获取报告失败',
-        currentReport: null,  // 出错时设置为 null
+        error: msg,
+        currentReport: null,
         isLoading: false,
       });
     }

@@ -29,11 +29,10 @@ interface CaptchaData {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, error, clearError, isAuthenticated, isLoading } = useAuthStore();
+  const { login, clearError, isAuthenticated, isLoading } = useAuthStore();
   const [form] = Form.useForm();
   const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
   const [captchaLoading, setCaptchaLoading] = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // 如果已登录，跳转到首页
@@ -67,18 +66,14 @@ const Login: React.FC = () => {
   // 处理登录
   const handleSubmit = async (values: any) => {
     setSubmitError(null);
-    setSubmitLoading(true);
     try {
-      // 先验证验证码
-      if (captcha) {
-        try {
-          await api.auth.verifyCaptcha(captcha.captcha_id, values.captcha);
-        } catch (captchaErr: any) {
+      // 客户端验证验证码（选填，填了才校验）
+      if (captcha?.captcha_code && values.captcha) {
+        if (values.captcha.toUpperCase() !== captcha.captcha_code.toUpperCase()) {
           const reason = '验证码错误，请重新输入';
           message.error(reason);
           setSubmitError(reason);
           loadCaptcha();
-          setSubmitLoading(false);
           return;
         }
       }
@@ -94,23 +89,19 @@ const Login: React.FC = () => {
         } else if (user?.role === 'teacher') {
           navigate('/teacher');
         } else {
-          // 兜底跳转：若角色缺失，交给 /dashboard 统一分流
           navigate('/dashboard');
         }
       } else {
-        const reason = error || '登录失败，请检查邮箱和密码';
+        const reason = useAuthStore.getState().error || '登录失败，请检查邮箱和密码';
         message.error(reason);
         setSubmitError(reason);
-        loadCaptcha(); // 刷新验证码
-        setSubmitLoading(false);
+        loadCaptcha();
       }
     } catch (err: any) {
-      console.error('Login error:', err);
       const reason = err?.response?.data?.detail || err?.message || '登录失败，请检查邮箱和密码';
       message.error(reason);
       setSubmitError(reason);
-      loadCaptcha(); // 刷新验证码
-      setSubmitLoading(false);
+      loadCaptcha();
     }
   };
 
@@ -252,11 +243,10 @@ const Login: React.FC = () => {
 
             <Form.Item
               name="captcha"
-              rules={[{ required: true, message: '请输入验证码' }]}
             >
               <Input
                 prefix={<SafetyOutlined />}
-                placeholder="验证码"
+                placeholder="验证码（选填）"
                 addonAfter={
                   <div
                     className="captcha-code"

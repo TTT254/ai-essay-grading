@@ -27,6 +27,7 @@ const AIChat: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -43,9 +44,14 @@ const AIChat: React.FC = () => {
   };
 
   const loadHistory = async () => {
-    if (!user?.id || !submissionId) return;
+    if (!user?.id || !submissionId) {
+      setLoadError('缺少必要参数');
+      setLoadingHistory(false);
+      return;
+    }
 
     setLoadingHistory(true);
+    setLoadError(null);
     try {
       const data = await api.aiChat.getHistory(user.id, submissionId);
       // 后端返回 { success, data: [{question, answer, ...}] }
@@ -67,7 +73,8 @@ const AIChat: React.FC = () => {
       ]);
       setMessages(historyMessages);
     } catch (err: unknown) {
-      void err;
+      const errMsg = err instanceof Error ? err.message : '加载历史消息失败';
+      setLoadError(errMsg);
     } finally {
       setLoadingHistory(false);
     }
@@ -104,11 +111,14 @@ const AIChat: React.FC = () => {
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err: unknown) {
-      void err;
+      const errDetail = err instanceof Error ? err.message : '';
+      const isNotFound = errDetail.includes('404') || errDetail.includes('不存在');
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: '抱歉，我遇到了一些问题，请稍后再试。',
+        content: isNotFound
+          ? '抱歉，找不到对应的作文提交记录。请确认该作文已成功提交并完成批改。'
+          : '抱歉，我遇到了一些问题，请稍后再试。',
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -161,6 +171,20 @@ const AIChat: React.FC = () => {
         {loadingHistory ? (
           <div className="chat-loading">
             <Spin size="large" tip="加载历史消息..." />
+          </div>
+        ) : loadError ? (
+          <div className="chat-empty-state">
+            <div className="chat-empty-icon" style={{ color: '#faad14' }}>
+              <RobotOutlined />
+            </div>
+            <div className="chat-empty-title">加载失败</div>
+            <div className="chat-empty-desc">
+              {loadError}
+            </div>
+            <div className="chat-empty-hints">
+              <span className="chat-hint-chip" onClick={() => loadHistory()}>点击重试</span>
+              <span className="chat-hint-chip" onClick={() => navigate(-1)}>返回上一页</span>
+            </div>
           </div>
         ) : messages.length === 0 ? (
           <div className="chat-empty-state">

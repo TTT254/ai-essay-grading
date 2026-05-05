@@ -38,21 +38,50 @@ async def get_teacher_assignments(class_id: str):
 async def get_assignment_submissions(assignment_id: str):
     """获取作业的所有提交"""
     try:
-        # 使用Supabase客户端直接查询
+        # 查询提交列表
         response = supabase_service.client.table("submissions").select(
             "*, users!inner(name)"
         ).eq("assignment_id", assignment_id).order("submitted_at", desc=True).execute()
 
-        # 格式化返回数据，添加学生姓名
+        if not response.data:
+            return {"success": True, "data": []}
+
+        # 批量查询这些提交对应的报告状态
+        submission_ids = [item["id"] for item in response.data]
+        reports_response = supabase_service.client.table("grading_reports").select(
+            "submission_id, published_at, reviewed_at, graded_at"
+        ).in_("submission_id", submission_ids).execute()
+
+        # 建立 submission_id → report 的映射
+        report_map = {}
+        for report in (reports_response.data or []):
+            report_map[report["submission_id"]] = report
+
+        # 格式化返回数据，根据 report 状态修正 status
         submissions = []
         for item in response.data:
+            report = report_map.get(item["id"])
+            status = item.get("status", "submitted")
+
+            # 根据 report 实际状态推导准确的 status
+            if report:
+                if report.get("published_at"):
+                    status = "published"
+                elif report.get("reviewed_at"):
+                    status = "reviewed"
+                elif report.get("graded_at"):
+                    status = "graded"
+
             submissions.append({
                 **item,
+                "status": status,
                 "student_name": item.get("users", {}).get("name", "未知学生"),
             })
 
         return {"success": True, "data": submissions}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"success": False, "error": str(e), "data": []}
 
 

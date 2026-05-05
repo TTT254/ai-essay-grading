@@ -20,7 +20,7 @@ const { Title, Text, Paragraph } = Typography;
 const Report: React.FC = () => {
   const navigate = useNavigate();
   const { submissionId } = useParams<{ submissionId: string }>();
-  const { currentReport, fetchReport, isLoading } = useStudentStore();
+  const { currentReport, fetchReport, isLoading, error } = useStudentStore();
 
   useEffect(() => {
     if (submissionId) {
@@ -28,10 +28,34 @@ const Report: React.FC = () => {
     }
   }, [submissionId]);
 
-  if (isLoading || !currentReport) {
+  if (isLoading) {
     return (
       <div className="page-container" style={{ textAlign: 'center', paddingTop: 100 }}>
         <Spin size="large" tip="加载中..." />
+      </div>
+    );
+  }
+
+  if (!currentReport) {
+    return (
+      <div className="page-container" style={{ textAlign: 'center', paddingTop: 100 }}>
+        <div style={{ maxWidth: 400, margin: '0 auto' }}>
+          <div style={{ fontSize: 48, marginBottom: 16, color: '#bfbfbf' }}>📄</div>
+          <Title level={4} style={{ color: '#595959' }}>
+            {error || '报告不存在'}
+          </Title>
+          <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
+            该作文可能尚未批改完成，或报告已被删除
+          </Text>
+          <Space>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/student/history')}>
+              返回历史记录
+            </Button>
+            <Button type="primary" onClick={() => submissionId && fetchReport(submissionId)}>
+              重新加载
+            </Button>
+          </Space>
+        </div>
       </div>
     );
   }

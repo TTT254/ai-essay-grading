@@ -8,7 +8,9 @@
 3. 流式输出支持
 """
 import os
+import json
 from typing import List, Dict, Any, Optional
+import httpx
 from openai import OpenAI
 from core.config import settings
 
@@ -17,10 +19,16 @@ class DashScopeService:
     """阿里云百炼服务类"""
 
     def __init__(self):
-        """初始化客户端"""
+        """初始化客户端（绕过系统代理直连阿里云）"""
+        # 显式禁用代理，避免本地代理拦截阿里云请求
+        no_proxy_client = httpx.Client(
+            proxy=None,
+            trust_env=False,
+        )
         self.client = OpenAI(
             api_key=settings.DASHSCOPE_API_KEY,
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            http_client=no_proxy_client,
         )
 
     async def chat_completion(
@@ -180,8 +188,6 @@ class DashScopeService:
             )
 
             # 解析JSON结果
-            import json
-
             content = result["content"]
 
             # 尝试提取JSON（去除可能的markdown标记）

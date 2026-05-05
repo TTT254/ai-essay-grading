@@ -59,27 +59,20 @@ export const useAuthStore = create<AuthState>()(
       error: null,
 
       login: async (email: string, password: string) => {
-        console.log('🔵 [authStore] login 开始', { email });
         set({ isLoading: true, error: null });
         try {
-          console.log('🔵 [authStore] 调用 authService.signIn...');
           const { data, error } = await authService.signIn(email, password);
-          console.log('🔵 [authStore] signIn 返回', { data, error });
 
           if (error) {
-            console.error('🔴 [authStore] signIn 错误', error);
             throw error;
           }
 
           if (data.user) {
-            console.log('🔵 [authStore] 登录成功，获取用户信息', data.user.id);
             // 获取用户详细信息
             let { data: userData, error: userError } = await userService.getUserById(data.user.id);
-            console.log('🔵 [authStore] getUserById 返回', { userData, userError });
 
             // 若业务用户不存在，则尝试用 metadata 初始化一条记录
             if (userError || !userData) {
-              console.log('🟡 [authStore] 业务用户不存在，尝试创建...');
               const md: any = (data.user as any).user_metadata || {};
               const createPayload: any = {
                 id: data.user.id,
@@ -88,18 +81,15 @@ export const useAuthStore = create<AuthState>()(
                 class_id: md.class_id ?? null,
               };
 
-              // 添加 name 字段（如果存在）
               if (md.name) {
                 createPayload.name = md.name;
               }
 
               const createRes = await userService.createUser(createPayload);
               if (createRes.error) {
-                console.error('🔴 [authStore] 创建业务用户失败', createRes.error);
-                throw createRes.error;
+                throw new Error(createRes.error.message || '创建用户信息失败');
               }
               userData = createRes.data;
-              console.log('🔵 [authStore] 业务用户创建成功', userData);
             }
 
             set({
@@ -111,17 +101,13 @@ export const useAuthStore = create<AuthState>()(
             // 保存token
             if (data.session?.access_token) {
               localStorage.setItem('access_token', data.session.access_token);
-              console.log('🔵 [authStore] token 已保存');
             }
 
-            console.log('✅ [authStore] 登录完成', userData);
             return true;
           }
-          console.error('🔴 [authStore] 登录失败：未返回用户信息');
           set({ error: '登录失败：未返回用户信息', isLoading: false });
           return false;
         } catch (error: any) {
-          console.error('🔴 [authStore] login 异常', error);
           const errMsg = formatError(error) || '登录失败';
           set({
             error: errMsg,
@@ -132,86 +118,87 @@ export const useAuthStore = create<AuthState>()(
       },
 
       register: async (email: string, password: string, userData) => {
-        console.log('🔵 [authStore] register 开始', { email, userData });
         set({ isLoading: true, error: null });
         try {
-          console.log('🔵 [authStore] 调用 authService.signUp...');
-          const { data, error } = await authService.signUp(email, password, userData);
-          console.log('🔵 [authStore] signUp 返回', { data, error });
+          // 添加超时保护，防止 Supabase 不可达时无限等待
+          const signUpPromise = authService.signUp(email, password, userData);
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('注册请求超时，请检查网络连接')), 15000)
+          );
+          const { data, error } = await Promise.race([signUpPromise, timeoutPromise]);
 
           if (error) {
-            console.error('🔴 [authStore] signUp 错误', error);
             throw error;
           }
 
-          if (data.user) {
-            console.log('🔵 [authStore] 用户创建成功', data.user.id);
+          if (!data.user) {
+            set({ error: '注册失败：未返回用户信息', isLoading: false });
+            return false;
+          }
 
-            // 立即在业务表中写入记录
-            const metadata: any = (data.user as any).user_metadata || {};
-            const userPayload: any = {
-              id: data.user.id,
-              email: data.user.email,
-              role: metadata.role ?? userData.role,
-              class_id: metadata.class_id ?? userData.class_id ?? null,
-            };
+          // 检测 Supabase "fake user" 场景：
+          // 邮箱已注册但未确认时，signUp 不报错但返回 identities 为空
+          const identities = (data.user as any).identities;
+          if (Array.isArray(identities) && identities.length === 0) {
+            set({
+              error: '该邮箱已注册，请直接登录或检查邮箱中的确认邮件',
+              isLoading: false,
+            });
+            return false;
+          }
 
-            // 添加 name/full_name 字段（根据数据库实际字段）
-            if (metadata.name ?? userData.name) {
-              userPayload.name = metadata.name ?? userData.name;
-            }
+          // 在业务表中写入记录
+          const metadata: any = (data.user as any).user_metadata || {};
+          const userPayload: any = {
+            id: data.user.id,
+            email: data.user.email,
+            role: metadata.role ?? userData.role,
+            class_id: metadata.class_id ?? userData.class_id ?? null,
+          };
 
-            console.log('🔵 [authStore] 创建业务用户', userPayload);
-            const createResult = await userService.createUser(userPayload);
+          if (metadata.name ?? userData.name) {
+            userPayload.name = metadata.name ?? userData.name;
+          }
 
-            if (createResult.error) {
-              console.error('🔴 [authStore] 创建业务用户失败', createResult.error);
-              console.error('🔴 [authStore] 错误详情', {
-                code: createResult.error.code,
-                message: createResult.error.message,
-                details: createResult.error.details,
-                hint: createResult.error.hint
-              });
+          const createResult = await userService.createUser(userPayload);
 
-              // 如果不是重复错误，抛出异常
-              if (createResult.error.code !== '23505') {
-                throw new Error(`创建用户失败: ${createResult.error.message}`);
-              } else {
-                console.log('🟡 [authStore] 用户已存在，跳过创建');
-              }
-            } else {
-              console.log('✅ [authStore] 业务用户创建成功', createResult.data);
-            }
-
-            // 无论邮箱确认状态如何，都尝试自动登录
-            console.log('🔵 [authStore] 准备自动登录...');
-            try {
-              const loginResult = await get().login(email, password);
-              console.log('✅ [authStore] 自动登录结果', loginResult);
-
-              // 如果登录成功，返回 true
-              if (loginResult) {
-                return true;
-              }
-
-              // 登录失败但注册成功，也返回 true
-              // 用户可能需要先确认邮箱才能登录
-              console.log('🟡 [authStore] 自动登录失败，但注册成功');
-              set({ isLoading: false });
-              return true;
-            } catch (loginError) {
-              console.error('🔴 [authStore] 自动登录失败', loginError);
-              // 登录失败但注册成功，返回 true
-              set({ isLoading: false });
-              return true;
+          if (createResult.error) {
+            // 重复记录可以忽略（用户已存在）
+            if (createResult.error.code !== '23505') {
+              throw new Error(`创建用户失败: ${createResult.error.message}`);
             }
           }
 
-          console.error('🔴 [authStore] 注册失败：未返回用户信息');
-          set({ error: '注册失败：未返回用户信息', isLoading: false });
-          return false;
+          // 尝试自动登录（不污染 error 状态）
+          try {
+            const { data: loginData, error: loginError } = await authService.signIn(email, password);
+
+            if (!loginError && loginData.user) {
+              // 自动登录成功，获取业务用户信息
+              const { data: bizUser } = await userService.getUserById(loginData.user.id);
+
+              if (bizUser) {
+                set({
+                  user: bizUser,
+                  isAuthenticated: true,
+                  isLoading: false,
+                  error: null,
+                });
+
+                if (loginData.session?.access_token) {
+                  localStorage.setItem('access_token', loginData.session.access_token);
+                }
+                return true;
+              }
+            }
+          } catch {
+            // 自动登录失败（如需邮箱确认），不影响注册成功的结果
+          }
+
+          // 注册成功但无法自动登录（需要邮箱确认）
+          set({ isLoading: false, error: null });
+          return true;
         } catch (error: any) {
-          console.error('🔴 [authStore] register 异常', error);
           const errMsg = formatError(error) || '注册失败';
           set({
             error: errMsg,
@@ -293,7 +280,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // 新增：重新发送确认邮件
+      // 重新发送确认邮件
       resendConfirmationEmail: async () => {
         const { user } = get();
         if (!user?.email) {
@@ -303,15 +290,10 @@ export const useAuthStore = create<AuthState>()(
 
         set({ isLoading: true, error: null });
         try {
-          console.log('📧 [authStore] 重新发送确认邮件', user.email);
           const { error } = await authService.resendConfirmation(user.email);
-
           if (error) {
-            console.error('❌ [authStore] 发送失败', error);
             throw error;
           }
-
-          console.log('✅ [authStore] 确认邮件已发送');
           set({ isLoading: false });
           return true;
         } catch (error: any) {

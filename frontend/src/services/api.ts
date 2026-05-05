@@ -148,9 +148,9 @@ export const api = {
 
   // 批改API
   grading: {
-    // AI自动批改
+    // AI自动批改（超时延长到90秒，AI处理需要时间）
     autoGrade: (submissionId: string) =>
-      api.post(`/api/grading/auto-grade/${submissionId}`),
+      apiClient.post(`/api/grading/auto-grade/${submissionId}`, null, { timeout: 90000 }).then((res) => res.data),
 
     // 教师审核
     reviewReport: (reportId: string, data: {
