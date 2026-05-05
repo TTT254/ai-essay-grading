@@ -3,8 +3,6 @@
 # AI作文批改系统 - 一键启动脚本
 # 使用方法：./start.sh
 
-set -e
-
 echo "======================================"
 echo "   AI作文批改系统 - 一键启动"
 echo "======================================"
@@ -37,7 +35,15 @@ if ! command -v pip3 &> /dev/null; then
     PIP_CMD="pip"
 fi
 
-$PIP_CMD install -r requirements.txt -q 2>/dev/null || $PIP_CMD install -r requirements.txt
+echo "   使用 $PYTHON_CMD ($($PYTHON_CMD --version 2>&1))"
+$PIP_CMD install -r requirements.txt --quiet || {
+    echo "❌ Python 依赖安装失败，尝试不带 --quiet 重新安装..."
+    $PIP_CMD install -r requirements.txt
+    if [ $? -ne 0 ]; then
+        echo "❌ 依赖安装失败，请检查 Python 环境"
+        exit 1
+    fi
+}
 echo "✅ 后端依赖安装完成"
 echo ""
 
@@ -52,8 +58,12 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
+echo "   使用 node $(node --version), npm $(npm --version)"
 if [ ! -d "node_modules" ]; then
-    npm install
+    npm install || {
+        echo "❌ npm install 失败，请检查网络"
+        exit 1
+    }
 else
     echo "   (node_modules 已存在，跳过安装)"
 fi
@@ -66,30 +76,77 @@ echo ""
 
 cd "$SCRIPT_DIR"
 
-# 清理旧进程（如果有）
+# 清理函数
 cleanup() {
     echo ""
     echo "🛑 正在停止服务..."
     kill $BACKEND_PID 2>/dev/null
     kill $FRONTEND_PID 2>/dev/null
+    wait $BACKEND_PID 2>/dev/null
+    wait $FRONTEND_PID 2>/dev/null
     exit 0
 }
 trap cleanup SIGINT SIGTERM
 
-# 启动后端
+# 启动后端（日志输出到终端）
 cd "$SCRIPT_DIR/backend"
 $PYTHON_CMD main.py &
 BACKEND_PID=$!
-echo "   ✅ 后端已启动 (PID: $BACKEND_PID)"
 
-# 等待后端就绪
-sleep 2
+# 等待后端就绪（最多等 10 秒）
+echo "   ⏳ 等待后端启动..."
+READY=false
+for i in $(seq 1 10); do
+    sleep 1
+    # 检查进程是否还活着
+    if ! kill -0 $BACKEND_PID 2>/dev/null; then
+        echo ""
+        echo "❌ 后端启动失败！请检查上方错误信息。"
+        echo "   常见原因："
+        echo "   1. Python 依赖未安装完整 → 运行: pip3 install -r backend/requirements.txt"
+        echo "   2. 端口 8000 被占用 → 运行: lsof -i :8000"
+        echo "   3. .env 配置有误 → 检查 backend/.env"
+        exit 1
+    fi
+    # 检查端口是否在监听
+    if command -v curl &> /dev/null; then
+        if curl -s http://localhost:8000/health > /dev/null 2>&1; then
+            READY=true
+            break
+        fi
+    elif command -v nc &> /dev/null; then
+        if nc -z localhost 8000 2>/dev/null; then
+            READY=true
+            break
+        fi
+    else
+        # 没有 curl 也没有 nc，等 3 秒就算了
+        if [ $i -ge 3 ]; then
+            READY=true
+            break
+        fi
+    fi
+done
+
+if [ "$READY" = true ]; then
+    echo "   ✅ 后端已启动 (http://localhost:8000)"
+else
+    echo "   ⚠️  后端可能还在启动中，继续启动前端..."
+fi
 
 # 启动前端
 cd "$SCRIPT_DIR/frontend"
 npm run dev &
 FRONTEND_PID=$!
-echo "   ✅ 前端已启动 (PID: $FRONTEND_PID)"
+
+# 等待前端就绪
+sleep 3
+if ! kill -0 $FRONTEND_PID 2>/dev/null; then
+    echo "❌ 前端启动失败！"
+    kill $BACKEND_PID 2>/dev/null
+    exit 1
+fi
+echo "   ✅ 前端已启动 (http://localhost:5173)"
 
 echo ""
 echo "======================================"
@@ -107,5 +164,8 @@ echo ""
 echo "按 Ctrl+C 停止所有服务"
 echo "======================================"
 
-# 等待子进程
-wait
+# 等待子进程（任一退出则全部停止）
+wait -n $BACKEND_PID $FRONTEND_PID 2>/dev/null
+echo ""
+echo "⚠️  有服务意外退出，正在停止所有服务..."
+cleanup
