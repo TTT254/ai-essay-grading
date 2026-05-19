@@ -128,6 +128,7 @@ async def health_check():
 async def get_all_classes():
     """获取所有班级列表（注册时使用，无需认证）"""
     classes = await supabase_service.get_all_classes()
+    classes = await supabase_service.ensure_default_classes(classes)
     return {"success": True, "data": classes}
 
 
@@ -140,10 +141,7 @@ async def seed_classes():
             return {"success": True, "message": f"已有 {len(existing)} 个班级，跳过", "count": len(existing)}
 
         classes = []
-        for grade in range(1, 7):
-            for cls_name in ["1班", "2班", "3班"]:
-                classes.append({"grade": grade, "name": cls_name})
-        for grade in range(7, 10):
+        for grade in range(1, 13):
             for cls_name in ["1班", "2班", "3班"]:
                 classes.append({"grade": grade, "name": cls_name})
 

@@ -123,7 +123,7 @@ const Profile: React.FC = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await userService.updateUser(user.id, {
+      const { error } = await userService.updateUser(user.id, {
         name: values.name,
       });
 

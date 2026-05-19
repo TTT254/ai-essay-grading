@@ -246,7 +246,7 @@ const Dashboard: React.FC = () => {
           >
             {classes.map((cls) => (
               <Option key={cls.id} value={cls.id}>
-                {cls.grade}年级{cls.class_name}
+                {cls.grade}年级{cls.name}
               </Option>
             ))}
           </Select>

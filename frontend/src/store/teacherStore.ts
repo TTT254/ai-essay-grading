@@ -32,6 +32,7 @@ interface TeacherState {
 
   // Actions
   fetchClasses: (teacherId: string) => Promise<void>;
+  createClass: (data: { grade: number; name: string; teacher_id: string }) => Promise<boolean>;
   createAssignment: (data: any) => Promise<boolean>;
   fetchAssignments: (classId: string, status?: string) => Promise<void>;
   reviewReport: (reportId: string, data: any) => Promise<boolean>;
@@ -63,6 +64,22 @@ export const useTeacherStore = create<TeacherState>((set) => ({
         classes: [],  // 出错时设置为空数组
         isLoading: false,
       });
+    }
+  },
+
+  createClass: async (data: { grade: number; name: string; teacher_id: string }) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api.teacher.createClass(data);
+      set({ isLoading: false });
+      return true;
+    } catch (error: any) {
+      const message = error.response?.data?.detail || error.message || '创建班级失败';
+      set({
+        error: message,
+        isLoading: false,
+      });
+      return false;
     }
   },
 

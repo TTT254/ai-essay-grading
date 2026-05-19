@@ -42,11 +42,52 @@ class SupabaseService:
     async def get_all_classes(self) -> list:
         """获取所有班级"""
         try:
-            response = self.client.table("classes").select("*").execute()
+            response = (
+                self.client.table("classes")
+                .select("*")
+                .order("grade", desc=False)
+                .order("name", desc=False)
+                .execute()
+            )
             return response.data
         except Exception as e:
             print(f"获取班级列表失败: {str(e)}")
             return []
+
+    async def ensure_default_classes(self, existing_classes: list) -> list:
+        """确保1-12年级至少各有一个可注册的默认班级"""
+        existing_grades = {class_item.get("grade") for class_item in existing_classes}
+        missing_classes = [
+            {"grade": grade, "name": "1班", "student_count": 0}
+            for grade in range(1, 13)
+            if grade not in existing_grades
+        ]
+
+        if not missing_classes:
+            return existing_classes
+
+        try:
+            response = self.client.table("classes").insert(missing_classes).execute()
+            created_classes = response.data or missing_classes
+            return sorted(
+                [*existing_classes, *created_classes],
+                key=lambda class_item: (class_item.get("grade") or 0, class_item.get("name") or ""),
+            )
+        except Exception as e:
+            print(f"创建默认班级失败: {str(e)}")
+            return sorted(
+                [*existing_classes, *missing_classes],
+                key=lambda class_item: (class_item.get("grade") or 0, class_item.get("name") or ""),
+            )
+
+    async def create_class(self, data: dict) -> Optional[dict]:
+        """创建班级"""
+        try:
+            response = self.client.table("classes").insert(data).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"创建班级失败: {str(e)}")
+            return None
 
     async def get_classes_by_teacher(self, teacher_id: str) -> list:
         """获取教师的班级列表"""

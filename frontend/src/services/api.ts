@@ -113,6 +113,14 @@ export const api = {
     getClasses: (teacherId: string) =>
       api.get(`/api/teacher/classes?teacher_id=${teacherId}`),
 
+    // 创建班级
+    createClass: (data: {
+      grade: number;
+      name: string;
+      teacher_id: string;
+    }) =>
+      api.post('/api/teacher/classes', data),
+
     // 创建作业
     createAssignment: (data: {
       title: string;

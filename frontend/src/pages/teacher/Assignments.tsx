@@ -73,7 +73,7 @@ const Assignments: React.FC = () => {
     }
   };
 
-  const getStatusTag = (deadline: string, submissionCount: number, totalStudents: number) => {
+  const getStatusTag = (deadline: string) => {
     const now = dayjs();
     const deadlineDate = dayjs(deadline);
     const diff = deadlineDate.diff(now, 'day');
@@ -142,8 +142,8 @@ const Assignments: React.FC = () => {
       dataIndex: 'deadline',
       key: 'status',
       width: 100,
-      render: (deadline: string, record: any) =>
-        getStatusTag(deadline, record.submission_count, record.total_students),
+      render: (deadline: string) =>
+        getStatusTag(deadline),
     },
     {
       title: '操作',
@@ -161,8 +161,6 @@ const Assignments: React.FC = () => {
     },
   ];
 
-  const selectedClass = classes.find((c) => c.id === selectedClassId);
-
   return (
     <div className="page-container">
       <div className="page-header">
@@ -176,7 +174,7 @@ const Assignments: React.FC = () => {
           >
             {classes.map((cls) => (
               <Option key={cls.id} value={cls.id}>
-                {cls.grade}年级{cls.class_name}
+                {cls.grade}年级{cls.name}
               </Option>
             ))}
           </Select>

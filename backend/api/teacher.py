@@ -2,6 +2,7 @@
 教师端API路由
 """
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 from external.supabase_service import supabase_service
 from external.dashscope_service import dashscope_service
 from datetime import datetime
@@ -9,11 +10,32 @@ from datetime import datetime
 router = APIRouter(prefix="/teacher", tags=["教师端"])
 
 
+class CreateClassRequest(BaseModel):
+    """创建班级请求"""
+
+    grade: int = Field(..., ge=1, le=12)
+    name: str = Field(..., min_length=1, max_length=100)
+    teacher_id: str
+
+
 @router.get("/classes")
 async def get_teacher_classes(teacher_id: str):
     """获取教师的班级列表"""
     classes = await supabase_service.get_classes_by_teacher(teacher_id)
     return {"success": True, "data": classes}
+
+
+@router.post("/classes")
+async def create_teacher_class(data: CreateClassRequest):
+    """教师创建班级"""
+    class_data = data.model_dump()
+    class_data["student_count"] = 0
+    class_item = await supabase_service.create_class(class_data)
+
+    if not class_item:
+        raise HTTPException(status_code=500, detail="创建班级失败")
+
+    return {"success": True, "data": class_item}
 
 
 @router.post("/assignments")

@@ -27,9 +27,13 @@ interface GradingReport {
   id: string;
   submission_id: string;
   total_score: number;
+  ai_total_score?: number;
+  teacher_total_score?: number;
   scores: any;
+  ai_scores?: any;
   errors: any[];
   comment: string;
+  ai_comment?: string;
   teacher_scores?: any;
   teacher_comment?: string;
   status: string;

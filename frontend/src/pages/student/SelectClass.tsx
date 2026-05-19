@@ -13,12 +13,12 @@ const { Option } = Select;
 interface Class {
   id: string;
   grade: number;
-  class_name: string;
+  name: string;
 }
 
 const SelectClass: React.FC = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useAuthStore();
+  const { updateUser } = useAuthStore();
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
@@ -104,7 +104,7 @@ const SelectClass: React.FC = () => {
             >
               {getClassesByGrade().map((cls) => (
                 <Option key={cls.id} value={cls.id}>
-                  {cls.grade}年级{cls.class_name}
+                  {cls.grade}年级{cls.name}
                 </Option>
               ))}
             </Select>

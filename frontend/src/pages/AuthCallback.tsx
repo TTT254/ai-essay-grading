@@ -3,7 +3,7 @@
  * 处理用户点击邮件中的确认链接后的逻辑
  */
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Spin, Result, Button } from 'antd';
 import { LoadingOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { supabase } from '../services/supabase';
@@ -13,8 +13,7 @@ type ConfirmStatus = 'loading' | 'success' | 'error';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { checkAuth, user } = useAuthStore();
+  const { checkAuth } = useAuthStore();
   const [status, setStatus] = useState<ConfirmStatus>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
 
