@@ -5,8 +5,8 @@
 import os
 import requests
 from typing import Optional
+from core.config import settings
 
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 RESEND_BASE_URL = "https://api.resend.com"
 
 
@@ -16,7 +16,9 @@ def send_email(to: str, subject: str, html: str) -> dict:
 
     当 RESEND_API_KEY 未配置时，跳过发送并打印提示。
     """
-    if not RESEND_API_KEY:
+    resend_api_key = settings.RESEND_API_KEY or os.getenv("RESEND_API_KEY", "")
+
+    if not resend_api_key:
         print(f"[Email] RESEND_API_KEY not set, skipping email to {to}: {subject}")
         return {"success": False, "reason": "no_api_key"}
 
@@ -24,7 +26,7 @@ def send_email(to: str, subject: str, html: str) -> dict:
         response = requests.post(
             f"{RESEND_BASE_URL}/emails",
             headers={
-                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Authorization": f"Bearer {resend_api_key}",
                 "Content-Type": "application/json",
             },
             json={

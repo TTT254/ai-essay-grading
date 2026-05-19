@@ -17,7 +17,7 @@ import {
   Typography,
 } from 'antd';
 import {  PlusOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useTeacherStore } from '../../store/teacherStore';
 import dayjs from 'dayjs';
@@ -27,7 +27,6 @@ const { TextArea } = Input;
 const { Option } = Select;
 
 const Assignments: React.FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
   const { classes, assignments, fetchClasses, fetchAssignments, createAssignment, isLoading } = useTeacherStore();
@@ -144,20 +143,6 @@ const Assignments: React.FC = () => {
       width: 100,
       render: (deadline: string) =>
         getStatusTag(deadline),
-    },
-    {
-      title: '操作',
-      key: 'action',
-      width: 120,
-      render: (_: any, record: any) => (
-        <Button
-          type="primary"
-          size="small"
-          onClick={() => navigate(`/teacher/grading/${record.id}`)}
-        >
-          批改作业
-        </Button>
-      ),
     },
   ];
 

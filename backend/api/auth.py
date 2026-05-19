@@ -3,7 +3,7 @@
 处理登录、注册、验证码等功能
 """
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 import random
 import string
 from datetime import datetime, timedelta

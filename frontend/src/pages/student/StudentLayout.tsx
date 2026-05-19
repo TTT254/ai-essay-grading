@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Avatar, Dropdown, Badge, Tooltip, message, Popover, Button, List } from 'antd';
 import {
   UnorderedListOutlined,
-  EditOutlined,
   HistoryOutlined,
   BookOutlined,
   UserOutlined,
@@ -114,12 +113,6 @@ const StudentLayout: React.FC = () => {
       onClick: () => { navigate('/student/tasks'); setMobileMenuOpen(false); },
     },
     {
-      key: '/student/submit',
-      icon: <EditOutlined />,
-      label: '提交作文',
-      onClick: () => { navigate('/student/tasks'); setMobileMenuOpen(false); },
-    },
-    {
       key: '/student/history',
       icon: <HistoryOutlined />,
       label: '历史记录',
@@ -142,7 +135,6 @@ const StudentLayout: React.FC = () => {
   const getSelectedKey = () => {
     const path = location.pathname;
     if (path.startsWith('/student/ai-chat')) return '/student/ai-chat';
-    if (path.startsWith('/student/submit')) return '/student/submit';
     return path;
   };
 

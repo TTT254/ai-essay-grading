@@ -7,7 +7,6 @@ import {
   UserOutlined,
   LockOutlined,
   MailOutlined,
-  SafetyOutlined,
   RobotOutlined,
   CheckCircleOutlined,
   HomeOutlined,
@@ -23,12 +22,6 @@ import './Register.css';
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-interface CaptchaData {
-  captcha_id: string;
-  captcha_code: string;
-  expires_at: string;
-}
-
 interface Class {
   id: string;
   grade: number;
@@ -39,27 +32,10 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
   const { register, isLoading, clearError } = useAuthStore();
   const [form] = Form.useForm();
-  const [captcha, setCaptcha] = useState<CaptchaData | null>(null);
-  const [captchaLoading, setCaptchaLoading] = useState(false);
   const [role, setRole] = useState<'student' | 'teacher'>('student');
   const initRef = useRef(false);
   const [classes, setClasses] = useState<Class[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
-
-  // 加载验证码
-  const loadCaptcha = async () => {
-    setCaptchaLoading(true);
-    try {
-      const data = await api.auth.getCaptcha();
-      setCaptcha(data);
-      form.setFieldValue('captcha', '');
-    } catch (err: any) {
-      message.error('加载验证码失败，请点击重试');
-      setCaptcha(null);
-    } finally {
-      setCaptchaLoading(false);
-    }
-  };
 
   // 加载班级列表
   const loadClasses = async () => {
@@ -74,7 +50,6 @@ const Register: React.FC = () => {
   useEffect(() => {
     if (!initRef.current) {
       initRef.current = true;
-      loadCaptcha();
       loadClasses();
     }
     return () => clearError();
@@ -141,13 +116,11 @@ const Register: React.FC = () => {
         const storeError = useAuthStore.getState().error;
         const errMsg = storeError || '注册失败，请检查邮箱是否已被使用';
         message.error(errMsg);
-        loadCaptcha();
       }
     } catch (err: any) {
       message.destroy('register');
       const errMsg = err.response?.data?.detail || err.message || '注册失败，请重试';
       message.error(errMsg);
-      loadCaptcha();
     }
   };
 
@@ -354,24 +327,6 @@ const Register: React.FC = () => {
                 </Form.Item>
               </>
             )}
-
-            <Form.Item
-              name="captcha"
-            >
-              <Input
-                prefix={<SafetyOutlined />}
-                placeholder="验证码（选填）"
-                addonAfter={
-                  <div
-                    className="captcha-code"
-                    onClick={loadCaptcha}
-                    style={{ cursor: 'pointer', userSelect: 'none' }}
-                  >
-                    {captchaLoading ? '加载中...' : (captcha?.captcha_code || '点击刷新')}
-                  </div>
-                }
-              />
-            </Form.Item>
 
             <Form.Item>
               <Button

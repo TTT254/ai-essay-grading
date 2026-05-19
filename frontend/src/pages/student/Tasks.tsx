@@ -2,9 +2,8 @@
  * 学生作文任务列表页 — 卡片网格布局
  */
 import React, { useEffect, useState } from 'react';
-import { Button, Tag, Typography, Card, Radio, Spin } from 'antd';
+import { Tag, Typography, Card, Radio, Spin } from 'antd';
 import { ClockCircleOutlined, FileTextOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useStudentStore } from '../../store/studentStore';
 import dayjs from 'dayjs';
@@ -15,7 +14,6 @@ const { Title } = Typography;
 type FilterKey = 'all' | 'pending' | 'submitted' | 'graded';
 
 const Tasks: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   const { assignments, fetchAssignments, isLoading } = useStudentStore();
   const [filter, setFilter] = useState<FilterKey>('all');
@@ -107,7 +105,6 @@ const Tasks: React.FC = () => {
             const deadlineInfo = getDeadlineInfo(assignment.deadline);
             const submissionStatus = getSubmissionStatus(assignment);
             const wordCountLabel = getWordCountLabel(assignment);
-            const isOverdue = dayjs(assignment.deadline).isBefore(dayjs());
 
             return (
               <Card key={assignment.id} className="task-card" bodyStyle={{ padding: '20px' }}>
@@ -134,14 +131,6 @@ const Tasks: React.FC = () => {
                   <span style={{ fontSize: 12, color: '#bbb' }}>
                     {dayjs(assignment.deadline).format('YYYY-MM-DD HH:mm')}
                   </span>
-                  <Button
-                    type="primary"
-                    size="small"
-                    onClick={() => navigate(`/student/submit/${assignment.id}`)}
-                    disabled={isOverdue}
-                  >
-                    开始写作
-                  </Button>
                 </div>
               </Card>
             );

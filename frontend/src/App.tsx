@@ -19,7 +19,6 @@ const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const StudentLayout = lazy(() => import('./pages/student/StudentLayout'));
 const StudentSelectClass = lazy(() => import('./pages/student/SelectClass'));
 const StudentTasks = lazy(() => import('./pages/student/Tasks'));
-const StudentSubmit = lazy(() => import('./pages/student/Submit'));
 const StudentHistory = lazy(() => import('./pages/student/History'));
 const StudentReport = lazy(() => import('./pages/student/Report'));
 const StudentAIChat = lazy(() => import('./pages/student/AIChat'));
@@ -29,7 +28,6 @@ const StudentProfile = lazy(() => import('./pages/student/Profile'));
 const TeacherLayout = lazy(() => import('./pages/teacher/TeacherLayout'));
 const TeacherClasses = lazy(() => import('./pages/teacher/Classes'));
 const TeacherAssignments = lazy(() => import('./pages/teacher/Assignments'));
-const TeacherGrading = lazy(() => import('./pages/teacher/Grading'));
 const TeacherDashboard = lazy(() => import('./pages/teacher/Dashboard'));
 const TeacherProfile = lazy(() => import('./pages/teacher/Profile'));
 
@@ -124,7 +122,6 @@ const App: React.FC = () => {
               >
                 <Route path="select-class" element={<StudentSelectClass />} />
                 <Route path="tasks" element={<StudentTasks />} />
-                <Route path="submit/:assignmentId" element={<StudentSubmit />} />
                 <Route path="history" element={<StudentHistory />} />
                 <Route path="report/:submissionId" element={<StudentReport />} />
                 <Route path="ai-chat/:submissionId" element={<StudentAIChat />} />
@@ -144,7 +141,6 @@ const App: React.FC = () => {
               >
                 <Route path="classes" element={<TeacherClasses />} />
                 <Route path="assignments" element={<TeacherAssignments />} />
-                <Route path="grading/:assignmentId" element={<TeacherGrading />} />
                 <Route path="dashboard" element={<TeacherDashboard />} />
                 <Route path="profile" element={<TeacherProfile />} />
                 <Route index element={<Navigate to="classes" replace />} />
