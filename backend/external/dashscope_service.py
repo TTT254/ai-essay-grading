@@ -9,6 +9,7 @@
 """
 import os
 import json
+import base64
 from typing import List, Dict, Any, Optional
 import httpx
 from openai import OpenAI
@@ -28,6 +29,11 @@ class DashScopeService:
         self.client = OpenAI(
             api_key=settings.DASHSCOPE_API_KEY,
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            http_client=no_proxy_client,
+        )
+        self.ark_client = OpenAI(
+            api_key=settings.ARK_API_KEY or settings.DASHSCOPE_API_KEY,
+            base_url=settings.ARK_BASE_URL,
             http_client=no_proxy_client,
         )
 
@@ -81,7 +87,7 @@ class DashScopeService:
             raise
 
     async def ocr_recognize(
-        self, image_url: str, model: str = "qwen-vl-plus"
+        self, image_url: str, model: str = ""
     ) -> Dict[str, Any]:
         """
         OCR 图像识别（手写作文识别）
@@ -94,8 +100,13 @@ class DashScopeService:
             识别结果字典
         """
         try:
-            completion = self.client.chat.completions.create(
-                model=model,
+            provider = settings.OCR_PROVIDER.lower()
+            client = self.ark_client if provider == "ark" else self.client
+            model_name = model or (
+                settings.ARK_OCR_MODEL if provider == "ark" else settings.DASHSCOPE_OCR_MODEL
+            )
+            completion = client.chat.completions.create(
+                model=model_name,
                 messages=[
                     {
                         "role": "user",
@@ -114,6 +125,7 @@ class DashScopeService:
             return {
                 "text": text,
                 "model": completion.model,
+                "provider": provider,
                 "success": True,
             }
         except Exception as e:
@@ -123,6 +135,17 @@ class DashScopeService:
                 "error": str(e),
                 "success": False,
             }
+
+    async def ocr_recognize_image_bytes(
+        self, image_data: bytes, content_type: str = "image/jpeg", model: str = ""
+    ) -> Dict[str, Any]:
+        """OCR recognition from uploaded image bytes.
+
+        This avoids requiring the model provider to fetch a public Supabase URL.
+        """
+        encoded = base64.b64encode(image_data).decode("ascii")
+        image_url = f"data:{content_type or 'image/jpeg'};base64,{encoded}"
+        return await self.ocr_recognize(image_url=image_url, model=model)
 
     async def grade_essay(
         self, essay_content: str, assignment_title: str = ""

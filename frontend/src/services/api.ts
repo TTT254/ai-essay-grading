@@ -90,6 +90,15 @@ export const api = {
     ocrRecognize: (imageUrl: string) =>
       api.post(`/api/student/ocr?image_url=${encodeURIComponent(imageUrl)}`),
 
+    // OCR识别上传文件，避免模型侧无法访问外部图片URL
+    ocrRecognizeImage: (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return apiClient.post('/api/student/ocr-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((res) => res.data);
+    },
+
     // 获取提交历史
     getHistory: (studentId: string, limit = 10, offset = 0) =>
       api.get(`/api/student/submissions/history?student_id=${studentId}&limit=${limit}&offset=${offset}`),

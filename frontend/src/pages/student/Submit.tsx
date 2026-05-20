@@ -53,7 +53,7 @@ const Submit: React.FC = () => {
   const navigate = useNavigate();
   const { assignmentId } = useParams<{ assignmentId: string }>();
   const { user } = useAuthStore();
-  const { submitEssay, uploadImage, ocrRecognize, isLoading, assignments } = useStudentStore();
+  const { submitEssay, uploadImage, ocrRecognizeImage, isLoading, assignments } = useStudentStore();
 
   const [content, setContent] = useState('');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -169,7 +169,7 @@ const Submit: React.FC = () => {
 
         // 自动进行OCR识别
         setRecognizing(true);
-        const text = await ocrRecognize(url);
+        const text = await ocrRecognizeImage(file);
         if (text) {
           setOcrResult(text);
           const htmlContent = formatOcrTextAsHtml(text);

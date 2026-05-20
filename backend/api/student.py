@@ -18,6 +18,20 @@ def count_plain_text_chars(content: str) -> int:
     return len(re.sub(r"\s+", "", plain_text))
 
 
+def validate_image_upload(file: UploadFile) -> str:
+    """Validate uploaded image and return the normalized extension."""
+    file_ext = ""
+    if file.filename and "." in file.filename:
+        file_ext = file.filename.rsplit(".", 1)[-1].lower()
+    else:
+        file_ext = "jpg"
+
+    if file_ext not in ["jpg", "jpeg", "png", "gif", "webp"]:
+        raise HTTPException(status_code=400, detail="不支持的文件格式")
+
+    return file_ext
+
+
 @router.get("/assignments")
 async def get_student_assignments(student_id: str):
     """获取学生的作文任务列表"""
@@ -50,20 +64,10 @@ async def create_submission(data: SubmissionCreate, student_id: str):
 @router.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
     """上传手写作文图片"""
-    import re
     import uuid
 
     file_data = await file.read()
-
-    # 获取文件扩展名
-    file_ext = ""
-    if file.filename and "." in file.filename:
-        file_ext = file.filename.rsplit(".", 1)[-1].lower()
-        # 只允许图片格式
-        if file_ext not in ["jpg", "jpeg", "png", "gif", "webp"]:
-            raise HTTPException(status_code=400, detail="不支持的文件格式")
-    else:
-        file_ext = "jpg"  # 默认扩展名
+    file_ext = validate_image_upload(file)
 
     # 生成安全的文件名：使用UUID + 时间戳
     timestamp = int(datetime.utcnow().timestamp() * 1000)
@@ -82,6 +86,24 @@ async def upload_image(file: UploadFile = File(...)):
 async def ocr_recognize(image_url: str):
     """OCR识别手写文字"""
     result = await dashscope_service.ocr_recognize(image_url)
+    return {"success": result["success"], "data": result}
+
+
+@router.post("/ocr-image")
+async def ocr_recognize_image(file: UploadFile = File(...)):
+    """OCR识别上传的手写作文图片。
+
+    文件直接传给多模态模型，避免模型无法访问 Supabase Storage URL。
+    """
+    validate_image_upload(file)
+    file_data = await file.read()
+    if not file_data:
+        raise HTTPException(status_code=400, detail="图片文件为空")
+
+    result = await dashscope_service.ocr_recognize_image_bytes(
+        file_data,
+        file.content_type or "image/jpeg",
+    )
     return {"success": result["success"], "data": result}
 
 

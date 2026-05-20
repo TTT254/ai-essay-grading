@@ -51,6 +51,7 @@ interface StudentState {
   submitEssay: (studentId: string, data: any) => Promise<boolean>;
   uploadImage: (file: File) => Promise<string | null>;
   ocrRecognize: (imageUrl: string) => Promise<string | null>;
+  ocrRecognizeImage: (file: File) => Promise<string | null>;
   fetchHistory: (studentId: string) => Promise<void>;
   fetchReport: (submissionId: string) => Promise<void>;
   clearError: () => void;
@@ -124,6 +125,27 @@ export const useStudentStore = create<StudentState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const data: any = await api.student.ocrRecognize(imageUrl);
+      const text = extractOcrText(data);
+      if (!text) {
+        const reason = data?.data?.error || data?.error || 'OCR识别未返回文字';
+        set({ error: reason, isLoading: false });
+        return null;
+      }
+      set({ isLoading: false });
+      return text;
+    } catch (error: any) {
+      set({
+        error: extractApiError(error, 'OCR识别失败'),
+        isLoading: false,
+      });
+      return null;
+    }
+  },
+
+  ocrRecognizeImage: async (file: File) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data: any = await api.student.ocrRecognizeImage(file);
       const text = extractOcrText(data);
       if (!text) {
         const reason = data?.data?.error || data?.error || 'OCR识别未返回文字';

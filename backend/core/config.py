@@ -31,6 +31,13 @@ class Settings(BaseSettings):
     # 阿里云百炼 API
     DASHSCOPE_API_KEY: str
 
+    # OCR 多模态识别配置
+    OCR_PROVIDER: str = "dashscope"
+    ARK_API_KEY: str = ""
+    ARK_BASE_URL: str = "https://ark.cn-beijing.volces.com/api/plan/v3"
+    ARK_OCR_MODEL: str = "doubao-seed-2.0-lite"
+    DASHSCOPE_OCR_MODEL: str = "qwen-vl-plus"
+
     # JWT 认证
     SECRET_KEY: str = "your-secret-key-here-change-in-production"
     ALGORITHM: str = "HS256"
