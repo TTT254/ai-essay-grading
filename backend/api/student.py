@@ -7,8 +7,15 @@ from external.dashscope_service import dashscope_service
 from external.supabase_service import supabase_service
 from schemas.submission import SubmissionCreate
 from datetime import datetime
+import re
 
 router = APIRouter(prefix="/student", tags=["学生端"])
+
+
+def count_plain_text_chars(content: str) -> int:
+    """Count essay characters without HTML tags or whitespace."""
+    plain_text = re.sub(r"<[^>]*>", "", content or "")
+    return len(re.sub(r"\s+", "", plain_text))
 
 
 @router.get("/assignments")
@@ -25,7 +32,7 @@ async def create_submission(data: SubmissionCreate, student_id: str):
         "assignment_id": data.assignment_id,
         "student_id": student_id,
         "content": data.content,
-        "word_count": len(data.content),
+        "word_count": count_plain_text_chars(data.content),
         "image_url": data.image_url,
         "ocr_result": data.ocr_result,
         "status": "submitted",

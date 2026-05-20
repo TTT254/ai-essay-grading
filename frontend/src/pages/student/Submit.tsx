@@ -41,6 +41,14 @@ const getWordCountStatus = (count: number, min: number | undefined) => {
   return { color: 'green', pct };
 };
 
+const formatOcrTextAsHtml = (text: string) => {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return `<p>${escaped.replace(/\n+/g, '</p><p>')}</p>`;
+};
+
 const Submit: React.FC = () => {
   const navigate = useNavigate();
   const { assignmentId } = useParams<{ assignmentId: string }>();
@@ -164,11 +172,13 @@ const Submit: React.FC = () => {
         const text = await ocrRecognize(url);
         if (text) {
           setOcrResult(text);
-          const htmlContent = `<p>${text.replace(/\n/g, '</p><p>')}</p>`;
+          const htmlContent = formatOcrTextAsHtml(text);
           setContent(htmlContent);
           editor?.commands.setContent(htmlContent);
           message.success('OCR识别成功');
           setActiveTab('2'); // 切换到编辑标签
+        } else {
+          message.error(useStudentStore.getState().error || 'OCR识别失败，请手动输入或重新上传更清晰的图片');
         }
       }
     } catch {
@@ -202,6 +212,8 @@ const Submit: React.FC = () => {
       clearDraft();
       message.success('提交成功！正在进行AI批改...');
       navigate('/student/history');
+    } else {
+      message.error(useStudentStore.getState().error || '提交失败，请稍后重试');
     }
   };
 

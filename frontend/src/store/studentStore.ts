@@ -56,6 +56,14 @@ interface StudentState {
   clearError: () => void;
 }
 
+export const extractOcrText = (response: any): string | null => {
+  const text = response?.text ?? response?.data?.text;
+  return typeof text === 'string' && text.trim() ? text : null;
+};
+
+const extractApiError = (error: any, fallback: string) =>
+  error?.response?.data?.detail || error?.response?.data?.message || error?.message || fallback;
+
 export const useStudentStore = create<StudentState>((set) => ({
   assignments: [],
   submissions: [],
@@ -90,7 +98,7 @@ export const useStudentStore = create<StudentState>((set) => ({
       return true;
     } catch (error: any) {
       set({
-        error: error.message || '提交失败',
+        error: extractApiError(error, '提交失败'),
         isLoading: false,
       });
       return false;
@@ -115,12 +123,18 @@ export const useStudentStore = create<StudentState>((set) => ({
   ocrRecognize: async (imageUrl: string) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await api.student.ocrRecognize(imageUrl);
+      const data: any = await api.student.ocrRecognize(imageUrl);
+      const text = extractOcrText(data);
+      if (!text) {
+        const reason = data?.data?.error || data?.error || 'OCR识别未返回文字';
+        set({ error: reason, isLoading: false });
+        return null;
+      }
       set({ isLoading: false });
-      return data.text;
+      return text;
     } catch (error: any) {
       set({
-        error: error.message || 'OCR识别失败',
+        error: extractApiError(error, 'OCR识别失败'),
         isLoading: false,
       });
       return null;
