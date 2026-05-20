@@ -6,6 +6,7 @@ import { Layout, Menu, Avatar, Dropdown, Badge, Tooltip, message, Popover, Butto
 import {
   TeamOutlined,
   FileTextOutlined,
+  CheckCircleOutlined,
   BarChartOutlined,
   UserOutlined,
   LogoutOutlined,
@@ -124,6 +125,12 @@ const TeacherLayout: React.FC = () => {
       onClick: () => handleMenuNavigate('/teacher/assignments'),
     },
     {
+      key: '/teacher/grading',
+      icon: <CheckCircleOutlined />,
+      label: '批改工作台',
+      onClick: () => handleMenuNavigate('/teacher/assignments'),
+    },
+    {
       key: '/teacher/dashboard',
       icon: <BarChartOutlined />,
       label: '数据看板',
@@ -139,6 +146,7 @@ const TeacherLayout: React.FC = () => {
 
   const getSelectedKey = () => {
     const path = location.pathname;
+    if (path.startsWith('/teacher/grading')) return '/teacher/grading';
     return path;
   };
 
