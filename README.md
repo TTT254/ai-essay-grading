@@ -291,12 +291,124 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ---
 
-## 🔑 演示账号
+## 🔑 账号密码汇总（数据库真实数据）
 
-| 角色 | 邮箱 | 密码 |
+### 教师账号
+
+| 邮箱 | 密码 | 姓名 | 管理班级 | User ID |
+|------|------|------|----------|---------|
+| `teacher@demo.com` | `demo123456` | 演示教师 | 3年级2班 | `a2663257-ba83-4fcd-8c07-e14a31a2aae8` |
+| `1806874707@qq.com` | `Test123456!` | 李老师 | 3年级1班、4年级1班、5年级1班、5年级3班、6年级1班、6年级2班 | `e66e0907-3dd5-4b34-9f09-1f95d6cc9f37` |
+
+### 学生账号（共 52 个，密码统一：`Test123456!`）
+
+#### 3年级2班（teacher@demo.com 管理）
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student@demo.com` | 演示学生（密码: `demo123456`） |
+| `student001@example.com` | 张三 |
+| `student009@example.com` | 郑晓明 |
+| `student016@example.com` | 刘子涵 |
+| `student023@example.com` | 黄子墨 |
+| `student030@example.com` | 吴雨桐 |
+| `student037@example.com` | 王晓东 |
+| `student044@example.com` | 吴晓霞 |
+| `student051@example.com` | 周子墨 |
+
+#### 3年级1班（1806874707@qq.com 管理）
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student008@example.com` | 吴十 |
+| `student015@example.com` | 吴佳慧 |
+| `student022@example.com` | 陈怡然 |
+| `student029@example.com` | 周俊逸 |
+| `student036@example.com` | 郑浩然 |
+| `student043@example.com` | 杨晓涛 |
+| `student050@example.com` | 孙怡然 |
+| `student057@example.com` | 徐俊逸 |
+
+#### 4年级1班
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student010@example.com` | 陈思远 |
+| `student017@example.com` | 陈俊杰 |
+| `student024@example.com` | 徐诗涵 |
+| `student031@example.com` | 赵天宇 |
+| `student038@example.com` | 张晓燕 |
+| `student045@example.com` | 郑晓龙 |
+| `student052@example.com` | 吴诗涵 |
+
+#### 5年级1班
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student011@example.com` | 林雨晨 |
+| `student018@example.com` | 李欣怡 |
+| `student025@example.com` | 杨浩宇 |
+| `student032@example.com` | 钱思思 |
+| `student039@example.com` | 刘晓峰 |
+| `student046@example.com` | 孙晓燕 |
+| `student053@example.com` | 郑浩宇 |
+
+#### 5年级3班
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student012@example.com` | 黄梓轩 |
+| `student019@example.com` | 王志强 |
+| `student026@example.com` | 吴思琪 |
+| `student033@example.com` | 孙诗琪 |
+| `student040@example.com` | 陈晓丽 |
+| `student047@example.com` | 周晓光 |
+| `student054@example.com` | 陈思琪 |
+
+#### 6年级1班
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student013@example.com` | 徐梦瑶 |
+| `student020@example.com` | 张雅婷 |
+| `student027@example.com` | 郑雅静 |
+| `student034@example.com` | 周俊峰 |
+| `student041@example.com` | 黄晓敏 |
+| `student048@example.com` | 赵雅婷 |
+| `student055@example.com` | 林雅静 |
+
+#### 6年级2班
+
+| 邮箱 | 姓名 |
+|------|------|
+| `student014@example.com` | 杨浩然 |
+| `student021@example.com` | 刘明轩 |
+| `student028@example.com` | 孙晨曦 |
+| `student035@example.com` | 吴雅琴 |
+| `student042@example.com` | 徐晓华 |
+| `student049@example.com` | 钱俊杰 |
+| `student056@example.com` | 黄晨曦 |
+
+### 班级总览
+
+| 班级 | 管理教师 | 学生数 | 班级 ID |
+|------|----------|--------|---------|
+| 3年级1班 | 李老师 (1806874707@qq.com) | 8 | `c0000000-0000-0000-0003-000000000001` |
+| 3年级2班 | 演示教师 (teacher@demo.com) | 7 | `c0000000-0000-0000-0003-000000000002` |
+| 4年级1班 | 李老师 | 7 | `c0000000-0000-0000-0003-000000000003` |
+| 5年级1班 | 李老师 | 7 | `c0000000-0000-0000-0003-000000000004` |
+| 5年级3班 | 李老师 | 7 | `c0000000-0000-0000-0003-000000000005` |
+| 6年级1班 | 李老师 | 7 | `c0000000-0000-0000-0003-000000000006` |
+| 6年级2班 | 李老师 | 7 | `c0000000-0000-0000-0003-000000000007` |
+
+### 快速登录
+
+| 用途 | 邮箱 | 密码 |
 |------|------|------|
-| 教师 | `teacher@demo.com` | `demo123456` |
-| 学生 | `student@demo.com` | `demo123456` |
+| 教师演示 | `teacher@demo.com` | `demo123456` |
+| 学生演示 | `student@demo.com` | `demo123456` |
+| 教师（多班级） | `1806874707@qq.com` | `Test123456!` |
+| 学生（任意） | `student001@example.com` | `Test123456!` |
 
 ---
 
